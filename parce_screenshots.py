@@ -94,81 +94,82 @@ async def attendance(page: Page, hotel_id, hotel_title=None):
 
 async def dynamic_rating(page: Page, hotel_id, hotel_title=None):
     current_year = datetime.now().year
-    await page.goto(f"https://tophotels.pro/hotel/{hotel_id}/new_stat/dynamics#month")
-
-    # Ждём появления таблицы в блоке "Month"
-    await page.wait_for_selector('#panel-month .bth__tbl', state="visible", timeout=10000)
-
-    # Скроллим вниз, чтобы подгрузились элементы (если ленивый рендер)
-    # await page.evaluate("window.scrollBy(0, 1000)")
-    await page.wait_for_timeout(1000)
-
-    # Ловим заголовок "In total: 2025" только в блоке #panel-month
-    header_2025 = page.locator(
-        f"xpath=//div[@id='panel-month']//div[contains(@class, 'bth__row') and contains(., 'In total: {current_year}')]"
-    )
 
     try:
-        await header_2025.wait_for(timeout=5000)
-    except:
-        print(f"❌ Не найден блок 'In total: {current_year}' для отеля {hotel_id}")
-        return
+        url = f"https://tophotels.pro/hotel/{hotel_id}/new_stat/dynamics#month"
+        await page.goto(url)
+        await page.wait_for_selector('#panel-month .bth__tbl', state="visible", timeout=10000)
+        await page.wait_for_timeout(1000)
 
-    header_index = await header_2025.evaluate(
-        "node => Array.from(node.parentNode.children).indexOf(node)"
-    )
+        # Поиск заголовка нужного года
+        header_locator = page.locator(
+            f"xpath=//div[@id='panel-month']//div[contains(@class, 'bth__row') and contains(., 'In total: {current_year}')]"
+        )
 
-    # Получаем строки только из блока #panel-month
-    all_rows = page.locator("#panel-month .bth__row")
-    count = await all_rows.count()
+        try:
+            await header_locator.wait_for(timeout=5000)
+        except:
+            print(f"❌ Не найден блок 'In total: {current_year}' для отеля {hotel_id}")
+            return
 
-    indexes = []
-    for i in range(header_index + 1, count):
-        row = all_rows.nth(i)
-        html = await row.evaluate("e => e.outerHTML")
-        if 'In total:' in html:
-            break
-        indexes.append(i)
+        header_index = await header_locator.evaluate(
+            "node => Array.from(node.parentNode.children).indexOf(node)"
+        )
 
-    # Bounding box всех строк
-    elements_to_shot = [all_rows.nth(i) for i in [header_index] + indexes]
-    boxes = []
-    for el in elements_to_shot:
-        box = await el.bounding_box()
-        if box:
-            boxes.append(box)
+        # Сбор всех строк таблицы
+        all_rows = page.locator("#panel-month .bth__row")
+        count = await all_rows.count()
 
-    if not boxes:
-        print(f"❌ Не найдены строки для 2025 в отеле {hotel_id}")
-        return
+        indexes = []
+        for i in range(header_index + 1, count):
+            row = all_rows.nth(i)
+            html = await row.evaluate("e => e.outerHTML")
+            if 'In total:' in html:
+                break
+            indexes.append(i)
 
-    # Общая область скриншота
-    min_x = min(box['x'] for box in boxes)
-    min_y = min(box['y'] for box in boxes)
-    max_x = max(box['x'] + box['width'] for box in boxes)
-    max_y = max(box['y'] + box['height'] for box in boxes)
+        elements_to_shot = [all_rows.nth(i) for i in [header_index] + indexes]
+        boxes = []
 
-    path = f'{SCREENSHOT_DIR}/{hotel_title or "default"}/05_dynamic_rating.png'
+        for el in elements_to_shot:
+            try:
+                await el.scroll_into_view_if_needed(timeout=2000)
+                box = await el.bounding_box()
+                if box:
+                    boxes.append(box)
+            except Exception as e:
+                print(f"⚠️ Пропущен элемент: {e}")
 
-    clip_area = {
-        "x": min_x,
-        "y": min_y,
-        "width": max_x - min_x,
-        "height": max_y - min_y,
-    }
+        if not boxes:
+            print(f"❌ Не найдены строки для {current_year} в отеле {hotel_id}")
+            return
 
-    if clip_area["width"] <= 0 or clip_area["height"] <= 0:
-        print(f"❌ Некорректная область скрина: {clip_area}")
-        return
+        # Область скриншота
+        min_x = min(box['x'] for box in boxes)
+        min_y = min(box['y'] for box in boxes)
+        max_x = max(box['x'] + box['width'] for box in boxes)
+        max_y = max(box['y'] + box['height'] for box in boxes)
 
-    await page.screenshot(path=path, clip={
-        "x": min_x,
-        "y": min_y,
-        "width": max_x - min_x,
-        "height": max_y - min_y,
-    })
+        clip_area = {
+            "x": min_x,
+            "y": min_y,
+            "width": max_x - min_x,
+            "height": max_y - min_y,
+        }
 
-    print(f"✅ Скриншот сохранён: {path}")
+        if clip_area["width"] <= 0 or clip_area["height"] <= 0:
+            print(f"❌ Некорректная область скрина: {clip_area}")
+            return
+
+        os.makedirs(f"{SCREENSHOT_DIR}/{hotel_title or 'default'}", exist_ok=True)
+        path = f'{SCREENSHOT_DIR}/{hotel_title or "default"}/05_dynamic_rating.png'
+
+        await page.screenshot(path=path, clip=clip_area)
+
+        print(f"✅ Скриншот сохранён: {path}")
+
+    except Exception as e:
+        logging.exception(f"[dynamic_rating] Ошибка при обработке отеля {hotel_id}: {e}, {url}")
 
 
 async def service_prices(page: Page, hotel_id, hotel_title=None):
@@ -176,17 +177,20 @@ async def service_prices(page: Page, hotel_id, hotel_title=None):
     'проблема с ТГ на странице и ссылка не проходит в цикле'
     try:
         url = f'https://tophotels.pro/al/{hotel_id[2:]}/stat/profile?group=day&vw=grouped'
-        print(url)
         await page.goto(url, timeout=0)
+
         locator = page.locator("section.js-block.thpro-tg-infoblock > i")
 
-        if await locator.is_visible():
-            await locator.click()
+        try:
+            if await locator.is_visible():
+                await locator.click()
+        except Exception as e:
+            logging.exception(f'Клик на телеграм сломался, {e}')
 
         await asyncio.sleep(2)
 
         element = await page.query_selector(SERVICES_AND_PRICES_LOCATOR)
-        old_viewport = page.viewport_size
+        old_viewport = page.viewport_size  # TODO посмотреть почему не меняется масштаб и падает
         await page.set_viewport_size({"width": 1400, "height": 1000})
         await element.screenshot(path=f'{SCREENSHOT_DIR}/{hotel_title or "default"}/06_service_prices.png')
         await page.set_viewport_size(old_viewport)
@@ -200,6 +204,12 @@ async def rating_hotels_in_hurghada(page, count_review, hotel_id, hotel_title=No
 
     try:
         await page.goto(url, timeout=5000)
+
+        page_content = await page.content()
+        if "There is no data for the hotel" in page_content:
+            logging.warning(f"[{hotel_id}] Нет данных по отелю ({hotel_title}) — 'There is no data for the hotel'")
+            return
+
         locator_10 = '#tab-pjax-index > div > div.js-act-long-view > div:nth-child(5) > table > tbody > ' \
                      'tr:nth-child(2) > td:nth-child(2) > a'
         locator_50 = '#tab-pjax-index > div > div.js-act-long-view > div:nth-child(5) > table > tbody > ' \
