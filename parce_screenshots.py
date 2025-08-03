@@ -209,7 +209,10 @@ async def rating_hotels_in_hurghada(page, count_review, hotel_id, hotel_title=No
         if "There is no data for the hotel" in page_content:
             logging.warning(f"[{hotel_id}] Нет данных по отелю ({hotel_title}) — 'There is no data for the hotel'")
             return
-
+        if "To activate your business account, contact us" in page_content:
+            element = page.query_selector('#tab-pjax-index > div > div.js-act-long-view')
+            await element.screenshot(path=f'{SCREENSHOT_DIR}/{hotel_title or "default"}/07_rating_in_hurghada.png')
+            return
         locator_10 = '#tab-pjax-index > div > div.js-act-long-view > div:nth-child(5) > table > tbody > ' \
                      'tr:nth-child(2) > td:nth-child(2) > a'
         locator_50 = '#tab-pjax-index > div > div.js-act-long-view > div:nth-child(5) > table > tbody > ' \
@@ -292,8 +295,9 @@ async def run():
                 await attendance(page, hotel_id, title)
                 await dynamic_rating(page, hotel_id, title)
                 await service_prices(page, hotel_id, title)
+                count_review = str(5)
                 await rating_hotels_in_hurghada(page, count_review, hotel_id, title)
-                await last_activity(page, hotel_id, title)
+                # await last_activity(page, hotel_id, title)
                 logging.info(f"✅ Готово: {hotel_id} ({title})")
             except Exception as e:
                 logging.exception(f"‼️ Ошибка при обработке отеля {hotel_id, title}")
