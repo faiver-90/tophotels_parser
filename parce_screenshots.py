@@ -295,9 +295,8 @@ async def run():
                 await attendance(page, hotel_id, title)
                 await dynamic_rating(page, hotel_id, title)
                 await service_prices(page, hotel_id, title)
-                count_review = str(5)
                 await rating_hotels_in_hurghada(page, count_review, hotel_id, title)
-                # await last_activity(page, hotel_id, title)
+                await last_activity(page, hotel_id, title)
                 logging.info(f"✅ Готово: {hotel_id} ({title})")
             except Exception as e:
                 logging.exception(f"‼️ Ошибка при обработке отеля {hotel_id, title}")
