@@ -1,6 +1,8 @@
 import asyncio
 import logging
 import os
+import time
+from datetime import datetime
 from typing import List
 
 from playwright.async_api import async_playwright, Page
@@ -91,7 +93,82 @@ async def attendance(page: Page, hotel_id, hotel_title=None):
 
 
 async def dynamic_rating(page: Page, hotel_id, hotel_title=None):
-    pass
+    current_year = datetime.now().year
+    await page.goto(f"https://tophotels.pro/hotel/{hotel_id}/new_stat/dynamics#month")
+
+    # Ждём появления таблицы в блоке "Month"
+    await page.wait_for_selector('#panel-month .bth__tbl', state="visible", timeout=10000)
+
+    # Скроллим вниз, чтобы подгрузились элементы (если ленивый рендер)
+    # await page.evaluate("window.scrollBy(0, 1000)")
+    await page.wait_for_timeout(1000)
+
+    # Ловим заголовок "In total: 2025" только в блоке #panel-month
+    header_2025 = page.locator(
+        f"xpath=//div[@id='panel-month']//div[contains(@class, 'bth__row') and contains(., 'In total: {current_year}')]"
+    )
+
+    try:
+        await header_2025.wait_for(timeout=5000)
+    except:
+        print(f"❌ Не найден блок 'In total: {current_year}' для отеля {hotel_id}")
+        return
+
+    header_index = await header_2025.evaluate(
+        "node => Array.from(node.parentNode.children).indexOf(node)"
+    )
+
+    # Получаем строки только из блока #panel-month
+    all_rows = page.locator("#panel-month .bth__row")
+    count = await all_rows.count()
+
+    indexes = []
+    for i in range(header_index + 1, count):
+        row = all_rows.nth(i)
+        html = await row.evaluate("e => e.outerHTML")
+        if 'In total:' in html:
+            break
+        indexes.append(i)
+
+    # Bounding box всех строк
+    elements_to_shot = [all_rows.nth(i) for i in [header_index] + indexes]
+    boxes = []
+    for el in elements_to_shot:
+        box = await el.bounding_box()
+        if box:
+            boxes.append(box)
+
+    if not boxes:
+        print(f"❌ Не найдены строки для 2025 в отеле {hotel_id}")
+        return
+
+    # Общая область скриншота
+    min_x = min(box['x'] for box in boxes)
+    min_y = min(box['y'] for box in boxes)
+    max_x = max(box['x'] + box['width'] for box in boxes)
+    max_y = max(box['y'] + box['height'] for box in boxes)
+
+    path = f'{SCREENSHOT_DIR}/{hotel_title or "default"}/05_dynamic_rating.png'
+
+    clip_area = {
+        "x": min_x,
+        "y": min_y,
+        "width": max_x - min_x,
+        "height": max_y - min_y,
+    }
+
+    if clip_area["width"] <= 0 or clip_area["height"] <= 0:
+        print(f"❌ Некорректная область скрина: {clip_area}")
+        return
+
+    await page.screenshot(path=path, clip={
+        "x": min_x,
+        "y": min_y,
+        "width": max_x - min_x,
+        "height": max_y - min_y,
+    })
+
+    print(f"✅ Скриншот сохранён: {path}")
 
 
 async def service_prices(page: Page, hotel_id, hotel_title=None):
@@ -136,7 +213,7 @@ async def rating_hotels_in_hurghada(page, count_review, hotel_id, hotel_title=No
         element = await page.query_selector(RATING_HOTEL_IN_HURGHADA_LOCATOR)
 
         if element:
-            await element.screenshot(path=f'{SCREENSHOT_DIR}/{hotel_title or "default"}/06_rating_in_hurghada.png')
+            await element.screenshot(path=f'{SCREENSHOT_DIR}/{hotel_title or "default"}/07_rating_in_hurghada.png')
         else:
             print(f"[!] Таблица рейтинга не найдена у отеля {hotel_id} на странице {url}")
     except Exception as e:
@@ -155,7 +232,7 @@ async def last_activity(page: Page, hotel_id, hotel_title=None):
 
         old_viewport = page.viewport_size
         await page.set_viewport_size({"width": 1400, "height": 1000})
-        await element.screenshot(path=f'{SCREENSHOT_DIR}/{hotel_title or "default"}/05_activity.png')
+        await element.screenshot(path=f'{SCREENSHOT_DIR}/{hotel_title or "default"}/08_activity.png')
         await page.set_viewport_size(old_viewport)
     except Exception as e:
         logging.exception(f"[last_activity] Ошибка при выполнении {url}")
@@ -203,10 +280,10 @@ async def run():
                 await top_screen(page, hotel_id, title)
                 count_review = await review_screen(page, hotel_id, title)
                 await attendance(page, hotel_id, title)
-                await last_activity(page, hotel_id, title)
-                await rating_hotels_in_hurghada(page, count_review, hotel_id, title)
+                await dynamic_rating(page, hotel_id, title)
                 await service_prices(page, hotel_id, title)
-                await dynamic_rating(page, hotel_id, title)  # TODO <---- доделать
+                await rating_hotels_in_hurghada(page, count_review, hotel_id, title)
+                await last_activity(page, hotel_id, title)
                 logging.info(f"✅ Готово: {hotel_id} ({title})")
             except Exception as e:
                 logging.exception(f"‼️ Ошибка при обработке отеля {hotel_id, title}")
