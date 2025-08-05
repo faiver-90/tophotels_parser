@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import os
-import time
+from PIL import Image
 from datetime import datetime
 from typing import List
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
@@ -145,7 +145,8 @@ async def attendance(page: Page, hotel_id, hotel_title=None):
             if await page.is_visible(incorrect_data_selector):
                 text = await page.inner_text(incorrect_data_selector)
                 if "At the moment, the service may show incorrect data" in text:
-                    logging.warning(f"[attendance] Предупреждение о данных на {hotel_id}. Попытка {attempt + 1} из {attempts}")
+                    logging.warning(
+                        f"[attendance] Предупреждение о данных на {hotel_id}. Попытка {attempt + 1} из {attempts}")
                     await asyncio.sleep(2)
                     continue  # пробуем ещё раз
 
@@ -177,7 +178,6 @@ async def attendance(page: Page, hotel_id, hotel_title=None):
             logging.warning(f"[attendance] После {attempts} попыток ошибка осталась. Сделан скрин ошибки.")
     except Exception as e:
         logging.exception(f"[attendance] Ошибка при выполнении {url}")
-
 
 
 @retry(
@@ -373,13 +373,10 @@ async def rating_hotels_in_hurghada(page, count_review, hotel_id, hotel_title=No
 )
 async def last_activity(page: Page, hotel_id, hotel_title=None):
     try:
-        'https://tophotels.pro/hotel/al27382/activity/index'
         url = BASE_URL_PRO + "hotel/" + hotel_id + '/activity/index'
         await page.goto(url, timeout=0)
 
-        await page.wait_for_selector(ACTIVITY_LOCATOR,
-                                     state="visible",
-                                     timeout=30000)
+        await page.wait_for_selector(ACTIVITY_LOCATOR, state="visible", timeout=30000)
 
         element = await page.query_selector(ACTIVITY_LOCATOR)
         if element is None:
@@ -387,8 +384,23 @@ async def last_activity(page: Page, hotel_id, hotel_title=None):
 
         old_viewport = page.viewport_size
         await page.set_viewport_size({"width": 1400, "height": 1000})
-        await element.screenshot(path=f'{SCREENSHOT_DIR}/{hotel_title or "default"}/08_activity.png')
+
+        screenshot_dir = os.path.join(SCREENSHOT_DIR, hotel_title or "default")
+        os.makedirs(screenshot_dir, exist_ok=True)
+
+        full_path = os.path.join(screenshot_dir, "08_activity.png")
+
+        # Сделать скриншот элемента
+        await element.screenshot(path=full_path)
+
+        # Обрезать нижнюю половину (оставить верхнюю)
+        with Image.open(full_path) as img:
+            width, height = img.size
+            top_half = img.crop((0, 0, width, height // 2))  # (left, upper, right, lower)
+            top_half.save(full_path)
+
         await page.set_viewport_size(old_viewport)
+
     except Exception as e:
         logging.exception(f"[last_activity] Ошибка при выполнении {url}")
 
@@ -427,7 +439,7 @@ async def run():
         return
 
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
+        browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(locale='en-US', viewport={"width": 1005, "height": 1000})
         page = await context.new_page()
         try:
@@ -447,11 +459,11 @@ async def run():
 
                 # await top_screen(page, hotel_id, title)
                 # count_review = await review_screen(page, hotel_id, title)
-                await attendance(page, hotel_id, title)
+                # await attendance(page, hotel_id, title)
                 # await dynamic_rating(page, hotel_id, title)
                 # await service_prices(page, hotel_id, title)
                 # await rating_hotels_in_hurghada(page, count_review, hotel_id, title)
-                # await last_activity(page, hotel_id, title)
+                await last_activity(page, hotel_id, title)
                 logging.info(f"✅ Готово: {hotel_id} ({title})")
             except Exception as e:
                 logging.exception(f"‼️ Ошибка при обработке отеля {hotel_id, title}")
