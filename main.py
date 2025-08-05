@@ -11,7 +11,7 @@ load_dotenv()
 EMAIL = os.getenv('EMAIL')
 PASSWORD = os.getenv('PASSWORD')
 
-INPUT_FILE = 'ids.txt'
+INPUT_FILE = 'ids_shot_4_image.txt'
 OUTPUT_FILE = 'hotel_questions.xlsx'
 
 

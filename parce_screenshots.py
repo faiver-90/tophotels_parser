@@ -8,6 +8,8 @@ from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_t
 from playwright.async_api import Error as PlaywrightError
 
 from playwright.async_api import async_playwright, Page
+from tqdm import tqdm
+
 from main import AuthService
 
 logging.basicConfig(
@@ -21,7 +23,7 @@ logging.basicConfig(
 
 BASE_URL_RU = 'https://tophotels.ru/en/'
 BASE_URL_PRO = 'https://tophotels.pro/'
-INPUT_FILE = 'ids.txt'
+INPUT_FILE = 'ids_shot_4_image.txt'
 SCREENSHOT_DIR = 'screenshots'
 
 TOP_ELEMENT_LOCATOR = '#container > div.topline'
@@ -127,20 +129,55 @@ async def review_screen(page: Page, hotel_id, hotel_title=None):
     retry=retry_if_exception_type(PlaywrightError)
 )
 async def attendance(page: Page, hotel_id, hotel_title=None):
+    url = BASE_URL_PRO + "hotel/" + hotel_id + '/new_stat/attendance?filter%5Bperiod%5D=30'
+    incorrect_data_selector = '#cstm-filter-frm > article > div.js-filter-info.filter-new__info-wrap'
+    activation_required_selector = '#pg-container-stat > div > table'
+    attempts = 3
+
     try:
-        'https://tophotels.pro/hotel/al27382/new_stat/attendance?filter%5Bperiod%5D=30'
+        for attempt in range(attempts):
+            await page.goto(url, timeout=0)
 
-        url = BASE_URL_PRO + "hotel/" + hotel_id + '/new_stat/attendance?filter%5Bperiod%5D=30'
-        await page.goto(url, timeout=0)
+            # Ждём основной контент
+            await page.wait_for_selector(ATTENDANCE_LOCATOR, state="visible", timeout=30000)
 
-        await page.wait_for_selector(ATTENDANCE_LOCATOR,
-                                     state="visible",
-                                     timeout=30000)
+            # 1Проверка: "неверные данные"
+            if await page.is_visible(incorrect_data_selector):
+                text = await page.inner_text(incorrect_data_selector)
+                if "At the moment, the service may show incorrect data" in text:
+                    logging.warning(f"[attendance] Предупреждение о данных на {hotel_id}. Попытка {attempt + 1} из {attempts}")
+                    await asyncio.sleep(2)
+                    continue  # пробуем ещё раз
 
-        element = await page.query_selector(ATTENDANCE_LOCATOR)
-        await element.screenshot(path=f'{SCREENSHOT_DIR}/{hotel_title or "default"}/04_attendance.png')
+            # Проверка: "требуется активация"
+            page_content = await page.content()
+            if "Attention! For this report you need an additional activation." in page_content:
+                logging.warning(f"[attendance] Требуется активация отчёта для {hotel_id}")
+                try:
+                    element = await page.query_selector(activation_required_selector)
+                    if element:
+                        path = f'{SCREENSHOT_DIR}/{hotel_title or "default"}/04_attendance.png'
+                        await element.screenshot(path=path)
+                        logging.info(f"[attendance] Скриншот таблицы при требуемой активации сохранён: {path}")
+                    else:
+                        logging.warning(f"[attendance] Таблица при активации не найдена на {hotel_id}")
+                except Exception as e:
+                    logging.exception(f"[attendance] Ошибка при скриншоте таблицы активации: {e}")
+                return
+
+            # Всё нормально — делаем обычный скриншот
+            element = await page.query_selector(ATTENDANCE_LOCATOR)
+            await element.screenshot(path=f'{SCREENSHOT_DIR}/{hotel_title or "default"}/04_attendance.png')
+            return
+
+        # Ошибка "неверные данные" осталась после всех попыток
+        if await page.is_visible(incorrect_data_selector):
+            error_element = await page.query_selector(incorrect_data_selector)
+            await error_element.screenshot(path=f'{SCREENSHOT_DIR}/{hotel_title or "default"}/04_attendance.png')
+            logging.warning(f"[attendance] После {attempts} попыток ошибка осталась. Сделан скрин ошибки.")
     except Exception as e:
         logging.exception(f"[attendance] Ошибка при выполнении {url}")
+
 
 
 @retry(
@@ -390,7 +427,7 @@ async def run():
         return
 
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        browser = await p.chromium.launch(headless=False)
         context = await browser.new_context(locale='en-US', viewport={"width": 1005, "height": 1000})
         page = await context.new_page()
         try:
@@ -402,19 +439,19 @@ async def run():
             logging.exception("Ошибка при авторизации.")
             return
 
-        for hotel_id in hotel_ids:
+        for hotel_id in tqdm(hotel_ids, desc="Обработка отелей"):
             try:
                 logging.info(f"⏳ Работаем с отелем {hotel_id}")
                 title = await get_title_hotel(page, hotel_id)
                 os.makedirs(f"{SCREENSHOT_DIR}/{title}", exist_ok=True)
 
-                await top_screen(page, hotel_id, title)
-                count_review = await review_screen(page, hotel_id, title)
+                # await top_screen(page, hotel_id, title)
+                # count_review = await review_screen(page, hotel_id, title)
                 await attendance(page, hotel_id, title)
-                await dynamic_rating(page, hotel_id, title)
-                await service_prices(page, hotel_id, title)
-                await rating_hotels_in_hurghada(page, count_review, hotel_id, title)
-                await last_activity(page, hotel_id, title)
+                # await dynamic_rating(page, hotel_id, title)
+                # await service_prices(page, hotel_id, title)
+                # await rating_hotels_in_hurghada(page, count_review, hotel_id, title)
+                # await last_activity(page, hotel_id, title)
                 logging.info(f"✅ Готово: {hotel_id} ({title})")
             except Exception as e:
                 logging.exception(f"‼️ Ошибка при обработке отеля {hotel_id, title}")
@@ -423,7 +460,7 @@ async def run():
 
 
 async def main():
-    for i in range(10):
+    for i in range(2):
         await run()
 
 
