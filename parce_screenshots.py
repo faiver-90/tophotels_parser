@@ -23,7 +23,7 @@ logging.basicConfig(
 
 BASE_URL_RU = 'https://tophotels.ru/en/'
 BASE_URL_PRO = 'https://tophotels.pro/'
-INPUT_FILE = 'ids_shot_4_image.txt'
+INPUT_FILE = 'ids.txt'
 SCREENSHOT_DIR = 'screenshots'
 
 TOP_ELEMENT_LOCATOR = '#container > div.topline'
@@ -190,7 +190,6 @@ async def dynamic_rating(page: Page, hotel_id, hotel_title=None):
 
     try:
         url = BASE_URL_PRO + 'hotel/' + f"{hotel_id}/new_stat/dynamics#month"
-        print(url)
         await page.goto(url)
         await page.wait_for_selector('#panel-month .bth__tbl', state="visible", timeout=10000)
         await page.wait_for_timeout(1000)
@@ -232,7 +231,7 @@ async def dynamic_rating(page: Page, hotel_id, hotel_title=None):
                 if box:
                     boxes.append(box)
             except Exception as e:
-                print(f"⚠️ Пропущен элемент: {e}")
+                print(f"⚠️ Пропущен элемент [dynamic_rating]: {e}")
 
         if not boxes:
             print(f"❌ Не найдены строки для {current_year} в отеле {hotel_id}")
@@ -287,7 +286,6 @@ async def service_prices(page: Page, hotel_id, hotel_title=None):
     'https://tophotels.pro/al/317844/stat/profile?group=day&vw=grouped'
     try:
         url = BASE_URL_PRO + f'al/{hotel_id[2:]}/stat/profile?group=day&vw=grouped'
-        print(url)
         await page.goto(url, timeout=0)
 
         await hide_tg(page)
@@ -457,12 +455,12 @@ async def run():
                 title = await get_title_hotel(page, hotel_id)
                 os.makedirs(f"{SCREENSHOT_DIR}/{title}", exist_ok=True)
 
-                # await top_screen(page, hotel_id, title)
-                # count_review = await review_screen(page, hotel_id, title)
-                # await attendance(page, hotel_id, title)
-                # await dynamic_rating(page, hotel_id, title)
-                # await service_prices(page, hotel_id, title)
-                # await rating_hotels_in_hurghada(page, count_review, hotel_id, title)
+                await top_screen(page, hotel_id, title)
+                count_review = await review_screen(page, hotel_id, title)
+                await attendance(page, hotel_id, title)
+                await dynamic_rating(page, hotel_id, title)
+                await service_prices(page, hotel_id, title)
+                await rating_hotels_in_hurghada(page, count_review, hotel_id, title)
                 await last_activity(page, hotel_id, title)
                 logging.info(f"✅ Готово: {hotel_id} ({title})")
             except Exception as e:
