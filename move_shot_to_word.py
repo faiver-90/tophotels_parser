@@ -53,7 +53,8 @@ def create_formatted_doc():
         for file_name in sorted(os.listdir(folder_path)):
             if not file_name.lower().endswith(('.png', '.jpg', '.jpeg')):
                 continue
-
+            if file_name == '08_activity.png' or file_name == '07_rating_in_hurghada.png':
+                doc.add_page_break()
             if file_name in mapping_paragraph:
                 p = doc.add_paragraph()
                 p.alignment = WD_ALIGN_PARAGRAPH.LEFT

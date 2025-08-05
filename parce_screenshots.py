@@ -26,6 +26,8 @@ BASE_URL_PRO = 'https://tophotels.pro/'
 INPUT_FILE = 'ids.txt'
 SCREENSHOT_DIR = 'screenshots'
 
+MAX_ATTEMPTS_RUN = 20
+
 TOP_ELEMENT_LOCATOR = '#container > div.topline'
 POPULARS_LOCATOR = '#container > div.js-start-fixed-btn.grid > article > div.card-hotel-wrap > section.stata-bubble.stata-bubble--fz13-laptop.no-scrollbar'
 REVIEW_LOCATOR = '#container > div.card-hotel-wrap.mt30 > section:nth-child(3) > div > section'
@@ -429,6 +431,23 @@ async def set_language_en(page: Page):
     except Exception as e:
         logging.exception(f"[set_language_en] Ошибка при выборе языка: {e}")
 
+def all_folders_have_8_images(base_path: str) -> bool:
+    for folder in os.listdir(base_path):
+        if folder == 'None':
+            continue  # Пропустить папку с именем 'None'
+
+        folder_path = os.path.join(base_path, folder)
+        if not os.path.isdir(folder_path):
+            continue
+
+        images = [
+            f for f in os.listdir(folder_path)
+            if f.lower().endswith(('.png', '.jpg', '.jpeg'))
+        ]
+        if len(images) < 8:
+            print(f"🔁 Folder '{folder}' has only {len(images)} images.")
+            return False
+    return True
 
 async def run():
     hotel_ids = load_hotel_ids(INPUT_FILE)
@@ -470,9 +489,18 @@ async def run():
 
 
 async def main():
-    for i in range(2):
+    for attempt in range(1, MAX_ATTEMPTS_RUN + 1):
+        print(f"\n🌀 Attempt {attempt} of {MAX_ATTEMPTS_RUN}")
         await run()
 
+        if all_folders_have_8_images(SCREENSHOT_DIR):
+            print("✅ All folders contain at least 8 images.")
+            break
+        else:
+            print("⚠ Not all folders are complete. Retrying...\n")
+            await asyncio.sleep(1)  # Можно убрать или увеличить паузу при необходимости
+    else:
+        print("❌ Max attempts reached. Some folders still have less than 8 images.")
 
 if __name__ == '__main__':
     asyncio.run(main())
