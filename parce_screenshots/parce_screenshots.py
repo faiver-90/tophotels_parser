@@ -84,9 +84,6 @@ async def run_create_report():
     else:
         print("❌ Max attempts reached. Some folders still have less than 8 images.")
 
-    if os.path.exists(SCREENSHOTS_DIR):
-        shutil.rmtree(SCREENSHOTS_DIR)
-
 
 # if __name__ == '__main__':
 #     asyncio.run(main())
