@@ -27,7 +27,6 @@ OUTPUT_FILE_COUNTER_REVIEW = 'hotel_questions.xlsx'
 
 SCREENSHOTS_DIR = SCRIPT_DIR / "screenshots"
 
-
 BASE_URL_RU = 'https://tophotels.ru/en/'
 BASE_URL_PRO = 'https://tophotels.pro/'
 HOTELS_IDS_FILE = 'ids.txt'

@@ -1,10 +1,15 @@
+from pathlib import Path
+
 from docx import Document
 from docx.shared import Pt, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import os
+from dotenv import load_dotenv
 
 from config_app import SCREENSHOTS_DIR, curr_month, curr_year
-from utils import get_desktop_dir
+from utils import get_desktop_dir, normalize_windows_path
+
+load_dotenv()
 
 mapping_paragraph = {
     '01_top_element.png': '',
@@ -17,7 +22,10 @@ mapping_paragraph = {
     '08_activity.png': 'Last page activity: https://tophotels.pro/hotel/al27382/activity/index'
 }
 
-REPORTS_DIR = get_desktop_dir() / "TopHotels Reports" / f"{curr_year}" / f"{curr_month}"
+raw_path = os.getenv("PATH_FOR_REPORTS")
+base_dir = normalize_windows_path(raw_path) if raw_path else get_desktop_dir()
+
+REPORTS_DIR = base_dir / "TopHotels Reports" / f"{curr_year}" / f"{curr_month}"
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
 

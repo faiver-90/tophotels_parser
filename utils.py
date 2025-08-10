@@ -50,3 +50,13 @@ def get_desktop_dir() -> Path:
             return p
     return home
 # -----------------------------------------------------------------
+
+def normalize_windows_path(path_str: str) -> Path:
+    """Преобразует обычный путь Windows в безопасный Path."""
+    if not path_str:
+        return None
+    # Убираем кавычки, если есть
+    cleaned = path_str.strip().strip('"').strip("'")
+    # Заменяем обратные слэши на прямые
+    cleaned = cleaned.replace("\\", "/")
+    return Path(cleaned)
