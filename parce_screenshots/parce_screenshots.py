@@ -1,18 +1,16 @@
 import asyncio
 import logging
 import os
-import shutil
 
 from playwright.async_api import async_playwright
 from tqdm import tqdm
 
 from config_app import HOTELS_IDS_FILE, SCREENSHOTS_DIR, MAX_ATTEMPTS_RUN
 from auth_service import AuthService
-from parce_screenshots.moduls import dynamic_rating
 
 from parce_screenshots.moduls import review_screen
-from parce_screenshots.moduls import top_screen
-from parce_screenshots.utils import set_language_en, load_hotel_ids, get_title_hotel, all_folders_have_8_images
+from parce_screenshots.moduls import dynamic_rating, top_screen
+from parce_screenshots.utils import set_language_en, load_hotel_ids, get_title_hotel, all_folders_have_count_images
 from parce_screenshots.moduls.top_screen import top_screen
 from parce_screenshots.moduls.review_screen import review_screen
 from parce_screenshots.moduls.attendance import attendance
@@ -20,15 +18,6 @@ from parce_screenshots.moduls.dynamic_rating import dynamic_rating
 from parce_screenshots.moduls.service_prices import service_prices
 from parce_screenshots.moduls.rating_hotels_in_hurghada import rating_hotels_in_hurghada
 from parce_screenshots.moduls.last_activity import last_activity
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='[%(asctime)s] %(levelname)s: %(message)s',
-    handlers=[
-        logging.FileHandler("../script.log", mode='a', encoding='utf-8'),
-        logging.StreamHandler()
-    ]
-)
 
 
 async def run():
@@ -75,7 +64,7 @@ async def run_create_report():
         print(f"\n🌀 Attempt {attempt} of {MAX_ATTEMPTS_RUN}")
         await run()
 
-        if attempt > 2 and all_folders_have_8_images(SCREENSHOTS_DIR):
+        if attempt > 2 and all_folders_have_count_images(SCREENSHOTS_DIR, 8):
             print("✅ All folders contain at least 8 images.")
             break
         else:
@@ -83,7 +72,3 @@ async def run_create_report():
             await asyncio.sleep(1)  # Можно убрать или увеличить паузу при необходимости
     else:
         print("❌ Max attempts reached. Some folders still have less than 8 images.")
-
-
-# if __name__ == '__main__':
-#     asyncio.run(main())

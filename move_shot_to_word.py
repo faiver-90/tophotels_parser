@@ -3,7 +3,8 @@ from docx.shared import Pt, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import os
 
-from config_app import SCREENSHOTS_DIR, REPORTS_DIR
+from config_app import SCREENSHOTS_DIR, curr_month, curr_year
+from utils import get_desktop_dir
 
 mapping_paragraph = {
     '01_top_element.png': '',
@@ -16,12 +17,11 @@ mapping_paragraph = {
     '08_activity.png': 'Last page activity: https://tophotels.pro/hotel/al27382/activity/index'
 }
 
+REPORTS_DIR = get_desktop_dir() / "TopHotels Reports" / f"{curr_year}" / f"{curr_month}"
+REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
 
 def create_formatted_doc():
-    from datetime import datetime
-    curr_month = datetime.now().month
-    curr_year = datetime.now().year
-
     for folder_name in os.listdir(SCREENSHOTS_DIR):
         folder_path = os.path.join(SCREENSHOTS_DIR, folder_name)
         if not os.path.isdir(folder_path):
@@ -59,11 +59,10 @@ def create_formatted_doc():
             except Exception as e:
                 doc.add_paragraph(f"[Image error: {e}]")
 
-
         # Save report to 'reports'
         safe_name = folder_name.replace(" ", "_").replace("*", "")
-        save_path = os.path.join(REPORTS_DIR, f"{safe_name}.docx")
-        doc.save(save_path)
+        save_path = REPORTS_DIR / f"{safe_name}.docx"  # Path автоматически склеит путь
+        doc.save(save_path)  # python-docx принимает Path
         print(f"✔ Report created: {save_path}")
 
 

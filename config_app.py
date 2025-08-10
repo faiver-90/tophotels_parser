@@ -1,6 +1,23 @@
+# config_app.py
+import logging
 import os
-
+from datetime import datetime
+from pathlib import Path
 from dotenv import load_dotenv
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+
+curr_month = datetime.now().month
+curr_year = datetime.now().year
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='[%(asctime)s] %(levelname)s: %(message)s',
+    handlers=[
+        logging.FileHandler(SCRIPT_DIR / "script.log", mode='a', encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
 
 load_dotenv()
 EMAIL = os.getenv('EMAIL')
@@ -8,10 +25,8 @@ PASSWORD = os.getenv('PASSWORD')
 
 OUTPUT_FILE_COUNTER_REVIEW = 'hotel_questions.xlsx'
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-SCREENSHOTS_DIR = os.path.join(SCRIPT_DIR, "01_screenshots")
-REPORTS_DIR = os.path.join(SCRIPT_DIR, "00_reports")
-os.makedirs(REPORTS_DIR, exist_ok=True)
+SCREENSHOTS_DIR = SCRIPT_DIR / "screenshots"
+
 
 BASE_URL_RU = 'https://tophotels.ru/en/'
 BASE_URL_PRO = 'https://tophotels.pro/'

@@ -85,7 +85,7 @@ async def set_language_en(page: Page):
         logging.exception(f"[set_language_en] Ошибка при выборе языка: {e}")
 
 
-def all_folders_have_8_images(base_path: str) -> bool:
+def all_folders_have_count_images(base_path: str, count_files_dir: int) -> bool:
     for folder in os.listdir(base_path):
         if folder == 'None':
             continue  # Пропустить папку с именем 'None'
@@ -98,7 +98,7 @@ def all_folders_have_8_images(base_path: str) -> bool:
             f for f in os.listdir(folder_path)
             if f.lower().endswith(('.png', '.jpg', '.jpeg'))
         ]
-        if len(images) < 8:
+        if len(images) < count_files_dir:
             print(f"🔁 Folder '{folder}' has only {len(images)} images.")
             return False
     return True
