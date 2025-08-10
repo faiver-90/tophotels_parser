@@ -3,15 +3,7 @@ from docx.shared import Pt, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import os
 
-# 📂 Текущая директория, где находится скрипт
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# 📂 Папка с исходными скриншотами
-SCREENSHOTS_DIR = os.path.join(SCRIPT_DIR, "screenshots")
-
-# 📂 Папка, куда сохраняем отчёты
-REPORTS_DIR = os.path.join(SCRIPT_DIR, "reports")
-os.makedirs(REPORTS_DIR, exist_ok=True)
+from config_app import SCREENSHOTS_DIR, REPORTS_DIR
 
 mapping_paragraph = {
     '01_top_element.png': '',
