@@ -3,7 +3,7 @@
 .env.*          # .env.dev, .env.prod и т.п.
 *.env
 
-*screenshots*/
+/screenshots/
 *reports*/
 # Python: кэш и временные файлы
 __pycache__/
