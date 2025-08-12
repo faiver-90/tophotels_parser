@@ -32,11 +32,9 @@ async def run():
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=HEADLESS)
-        context = await browser.new_context(
-            locale="en-US", viewport={"width": 1005, "height": 1000}
-        )
-
+        context = await browser.new_context(locale="en-US", viewport={"width": 1005, "height": 1000})
         page = await context.new_page()
+
         try:
             await set_language_en(page)
             logging.info("Авторизация...")
@@ -46,9 +44,10 @@ async def run():
             logging.exception("Ошибка при авторизации.")
             return
 
-        for hotel_id in tqdm(hotel_ids, desc="Обработка отелей"):
+        # Обычный for + tqdm показывает прогресс, скорость и ETA
+        for hotel_id in tqdm(hotel_ids, desc="Обработка отелей", unit="отель", dynamic_ncols=True):
             try:
-                logging.info(f"⏳ Работаем с отелем {hotel_id}")
+                tqdm.write(f"→ {hotel_id}")  # опционально: вывести текущий ID поверх прогресс-бара
                 title = await safe_step(get_title_hotel, page, hotel_id)
 
                 await safe_step(top_screen, page, hotel_id, title)
@@ -58,9 +57,10 @@ async def run():
                 await safe_step(service_prices, page, hotel_id, title)
                 await safe_step(rating_hotels_in_hurghada, page, count_review, hotel_id, title)
                 await safe_step(last_activity, page, hotel_id, title)
+
                 logging.info(f"✅ Готово: {hotel_id} ({title})")
             except Exception:
-                logging.exception(f"‼️ Ошибка при обработке отеля {hotel_id, title}")
+                logging.exception(f"‼️ Ошибка при обработке отеля {hotel_id} ({title or 'unknown'})")
 
         await browser.close()
 

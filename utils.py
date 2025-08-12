@@ -4,6 +4,7 @@ import ctypes
 
 import json
 from pathlib import Path
+import platform
 
 from tenacity import RetryError
 
@@ -116,3 +117,18 @@ async def safe_step(step_fn, *args, **kwargs):
         logging.error(f"{step_fn.__name__} упал по RetryError: {e}")
     except Exception as e:
         logging.exception(f"{step_fn.__name__} упал с ошибкой: {e}")
+
+
+def sleep_system():
+    system = platform.system()
+    if system == "Windows":
+        # Спящий режим
+        os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
+        # Если нужен именно гибернация:
+        # os.system("shutdown /h")
+    elif system == "Linux":
+        os.system("systemctl suspend")
+    elif system == "Darwin":  # macOS
+        os.system("pmset sleepnow")
+    else:
+        print("Неизвестная ОС, команда сна не выполнена")

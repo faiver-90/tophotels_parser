@@ -6,6 +6,7 @@ from time import perf_counter
 from config_app import SCREENSHOTS_DIR
 from move_shot_to_word import create_formatted_doc
 from parce_screenshots.parce_screenshots import run_create_report
+from utils import sleep_system
 
 if __name__ == "__main__":
     t1_start = perf_counter()
@@ -22,3 +23,5 @@ if __name__ == "__main__":
     )
     if os.path.exists(SCREENSHOTS_DIR):
         shutil.rmtree(SCREENSHOTS_DIR)
+
+    sleep_system()
