@@ -4,7 +4,7 @@ from typing import Iterable
 
 # ваши селекторы можно прокидывать наружу
 from config_app import DELAY_FOR_DELETE, RETRIES_FOR_DELETE_LOCATORS
-from parce_screenshots.moduls.locators import POLL_OVERLAY_SELECTORS
+from parce_screenshots_moduls.moduls.locators import POLL_OVERLAY_SELECTORS
 
 
 async def nuke_poll_overlay(

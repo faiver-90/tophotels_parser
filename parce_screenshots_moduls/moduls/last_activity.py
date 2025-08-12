@@ -6,12 +6,12 @@ from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_t
 from playwright.async_api import Error as PlaywrightError
 
 from playwright.async_api import Page
-from parce_screenshots.utils import goto_strict
+from parce_screenshots_moduls.utils import goto_strict
 
 from config_app import BASE_URL_PRO, SCREENSHOTS_DIR, RETRIES_FOR_DELETE_LOCATORS, DELAY_FOR_DELETE
-from parce_screenshots.delete_any_popup import nuke_poll_overlay
-from parce_screenshots.moduls.locators import ACTIVITY_LOCATOR
-from parce_screenshots.utils import delete_locator
+from parce_screenshots_moduls.delete_any_popup import nuke_poll_overlay
+from parce_screenshots_moduls.moduls.locators import ACTIVITY_LOCATOR
+from parce_screenshots_moduls.utils import delete_locator
 from utils import get_screenshot_path
 
 

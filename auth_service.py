@@ -3,8 +3,8 @@ import asyncio
 from playwright.async_api import Page
 
 from config_app import PASSWORD, EMAIL, BASE_URL_PRO
-from parce_screenshots.delete_any_popup import nuke_poll_overlay
-from parce_screenshots.utils import goto_strict
+from parce_screenshots_moduls.delete_any_popup import nuke_poll_overlay
+from parce_screenshots_moduls.utils import goto_strict
 
 
 class AuthService:

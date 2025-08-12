@@ -2,25 +2,32 @@ import asyncio
 import logging
 
 from playwright.async_api import async_playwright
-from tenacity import RetryError
 from tqdm import tqdm
 
-from config_app import HOTELS_IDS_FILE, SCREENSHOTS_DIR, MAX_ATTEMPTS_RUN, HEADLESS, MAX_FIRST_RUN
+from config_app import (
+    HOTELS_IDS_FILE,
+    SCREENSHOTS_DIR,
+    MAX_ATTEMPTS_RUN,
+    HEADLESS,
+    MAX_FIRST_RUN,
+)
 from auth_service import AuthService
 
-from parce_screenshots.utils import (
+from parce_screenshots_moduls.utils import (
     set_language_en,
     load_hotel_ids,
     get_title_hotel,
     all_folders_have_count_images,
 )
-from parce_screenshots.moduls.top_screen import top_screen
-from parce_screenshots.moduls.review_screen import review_screen
-from parce_screenshots.moduls.attendance import attendance
-from parce_screenshots.moduls.dynamic_rating import dynamic_rating
-from parce_screenshots.moduls.service_prices import service_prices
-from parce_screenshots.moduls.rating_hotels_in_hurghada import rating_hotels_in_hurghada
-from parce_screenshots.moduls.last_activity import last_activity
+from parce_screenshots_moduls.moduls.top_screen import top_screen
+from parce_screenshots_moduls.moduls.review_screen import review_screen
+from parce_screenshots_moduls.moduls.attendance import attendance
+from parce_screenshots_moduls.moduls.dynamic_rating import dynamic_rating
+from parce_screenshots_moduls.moduls.service_prices import service_prices
+from parce_screenshots_moduls.moduls.rating_hotels_in_hurghada import (
+    rating_hotels_in_hurghada,
+)
+from parce_screenshots_moduls.moduls.last_activity import last_activity
 from utils import safe_step
 
 
@@ -32,7 +39,9 @@ async def run():
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=HEADLESS)
-        context = await browser.new_context(locale="en-US", viewport={"width": 1005, "height": 1000})
+        context = await browser.new_context(
+            locale="en-US", viewport={"width": 1005, "height": 1000}
+        )
         page = await context.new_page()
 
         try:
@@ -45,9 +54,13 @@ async def run():
             return
 
         # Обычный for + tqdm показывает прогресс, скорость и ETA
-        for hotel_id in tqdm(hotel_ids, desc="Обработка отелей", unit="отель", dynamic_ncols=True):
+        for hotel_id in tqdm(
+            hotel_ids, desc="Обработка отелей", unit="отель", dynamic_ncols=True
+        ):
             try:
-                tqdm.write(f"→ {hotel_id}")  # опционально: вывести текущий ID поверх прогресс-бара
+                tqdm.write(
+                    f"→ {hotel_id}"
+                )  # опционально: вывести текущий ID поверх прогресс-бара
                 title = await safe_step(get_title_hotel, page, hotel_id)
 
                 await safe_step(top_screen, page, hotel_id, title)
@@ -55,12 +68,16 @@ async def run():
                 await safe_step(attendance, page, hotel_id, title)
                 await safe_step(dynamic_rating, page, hotel_id, title)
                 await safe_step(service_prices, page, hotel_id, title)
-                await safe_step(rating_hotels_in_hurghada, page, count_review, hotel_id, title)
+                await safe_step(
+                    rating_hotels_in_hurghada, page, count_review, hotel_id, title
+                )
                 await safe_step(last_activity, page, hotel_id, title)
 
                 logging.info(f"✅ Готово: {hotel_id} ({title})")
             except Exception:
-                logging.exception(f"‼️ Ошибка при обработке отеля {hotel_id} ({title or 'unknown'})")
+                logging.exception(
+                    f"‼️ Ошибка при обработке отеля {hotel_id} ({title or 'unknown'})"
+                )
 
         await browser.close()
 
@@ -70,7 +87,9 @@ async def run_create_report():
         print(f"\n🌀 Attempt {attempt} of {MAX_ATTEMPTS_RUN}")
         await run()
 
-        if attempt >= MAX_FIRST_RUN and all_folders_have_count_images(SCREENSHOTS_DIR, 8):
+        if attempt >= MAX_FIRST_RUN and all_folders_have_count_images(
+            SCREENSHOTS_DIR, 8
+        ):
             print("✅ All folders contain at least 8 images.")
             break
         else:

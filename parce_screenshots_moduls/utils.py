@@ -13,9 +13,9 @@ from playwright.async_api import Error as PlaywrightError
 from playwright.async_api import Page, TimeoutError as PlaywrightTimeoutError
 
 from config_app import BASE_URL_PRO, BASE_URL_TH
-from parce_screenshots.delete_any_popup import nuke_poll_overlay
+from parce_screenshots_moduls.delete_any_popup import nuke_poll_overlay
 
-from parce_screenshots.moduls.locators import TG_HIDE_LOCATOR, FLAG_LOCATOR
+from parce_screenshots_moduls.moduls.locators import TG_HIDE_LOCATOR, FLAG_LOCATOR
 
 
 def load_hotel_ids(file_path: str) -> List[str]:
