@@ -7,7 +7,7 @@ RATING_HOTEL_IN_HURGHADA_LOCATOR = '.bth__scrolable-tbl .bth__table--bordering'
 SERVICES_AND_PRICES_LOCATOR = '#hotelProfileApp > table:nth-child(5)'
 TG_HIDE_LOCATOR = "section.js-block.thpro-tg-infoblock > i"
 ALL_TABLE_RATING_OVEREVIEW_LOCATOR = '#tab-pjax-index > div > div.js-act-long-view'
-FLAG_LOCATOR = 'body > div.page > header > section > div.header__r-col.header__r-col--abs-right > div > div > button > i'
+FLAG_LOCATOR = 'body > div > header > section > div.header__r-col > div > div:nth-child(4) > button > i'
 COUNT_REVIEW_LOCATOR = '#container > div.card-hotel-wrap.mt30 > section:nth-child(3) > div > section > ' \
                        'div.card-hotel-rating-list > ul:nth-child(4) > li:nth-child(1) > b'
 INCORRECT_DATA_SELECTOR = '#cstm-filter-frm > article > div.js-filter-info.filter-new__info-wrap'

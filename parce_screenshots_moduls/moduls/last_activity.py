@@ -50,11 +50,10 @@ async def last_activity(page: Page, hotel_id, hotel_title=None):
         # Сделать скриншот элемента
         await element.screenshot(path=full_path)
 
-        # Обрезать нижнюю половину (оставить верхнюю)
         with Image.open(full_path) as img:
             width, height = img.size
             top_half = img.crop(
-                (0, 0, width, height // height * 2 // 3)
+                (0, 0, width, height // 2)
             )  # (left, upper, right, lower)
             top_half.save(full_path)
 

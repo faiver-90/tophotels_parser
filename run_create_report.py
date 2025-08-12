@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 import shutil
 from time import perf_counter
@@ -14,7 +15,8 @@ if __name__ == "__main__":
     t1 = perf_counter()
     asyncio.run(run_create_report())
     create_formatted_doc()
-    print(f"\nElapsed: {perf_counter() - t1:.1f}s\n")
+    print(f"{'*' * 100} \nElapsed: {perf_counter() - t1:.1f}s\n {'*' * 100}")
     if os.path.exists(SCREENSHOTS_DIR):
         shutil.rmtree(SCREENSHOTS_DIR)
+    logging.info("*" * 100)
     sleep_system()

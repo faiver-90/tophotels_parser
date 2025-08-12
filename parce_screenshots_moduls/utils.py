@@ -78,7 +78,7 @@ async def hide_tg(page: Page):
 )
 async def set_language_en(page: Page):
     try:
-        await page.goto(BASE_URL_PRO)
+        await page.goto(BASE_URL_PRO, timeout=0)
 
         await page.wait_for_selector(FLAG_LOCATOR, state="visible", timeout=30000)
 
