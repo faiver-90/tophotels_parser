@@ -40,6 +40,26 @@ load_dotenv()
 # =========================
 # Вспомогательные функции
 # =========================
+def add_header_image(doc: Document, image_path: str | Path, width_inches: float = 2.0) -> None:
+    """
+    Вставляет картинку в верхний колонтитул во всех секциях документа.
+
+    Args:
+        doc: Объект Document (python-docx).
+        image_path: Путь к картинке.
+        width_inches: Ширина картинки в дюймах (по умолчанию 2.0).
+    """
+    image_path = Path(image_path)
+
+    if not image_path.exists():
+        raise FileNotFoundError(f"Файл {image_path} не найден.")
+
+    for section in doc.sections:
+        header = section.header
+        paragraph = header.paragraphs[0] if header.paragraphs else header.add_paragraph()
+        paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER  # Центрируем
+        run = paragraph.add_run()
+        run.add_picture(str(image_path), width=Inches(width_inches))
 
 
 def ensure_normal_style_arial(doc: Document) -> None:
@@ -50,6 +70,7 @@ def ensure_normal_style_arial(doc: Document) -> None:
     style = doc.styles["Normal"]
     style.font.name = FONT_NAME
     rPr = style._element.rPr
+
     rPr.rFonts.set(qn("w:ascii"), FONT_NAME)
     rPr.rFonts.set(qn("w:hAnsi"), FONT_NAME)
     rPr.rFonts.set(qn("w:eastAsia"), FONT_NAME)
@@ -189,6 +210,8 @@ def create_formatted_doc() -> None:
         mapping_paragraph = build_mapping(hotel_id, rating_url=rating_url)
 
         doc = Document()
+        add_header_image(doc, "th_logo/logo_2.jpg", width_inches=1)
+
         ensure_normal_style_arial(doc)
 
         # Заголовок файла
