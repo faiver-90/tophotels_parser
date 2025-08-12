@@ -29,7 +29,7 @@ FONT_SIZE_CAPTION = 12  # подписи к скринам
 IMAGE_WIDTH_INCHES = 6
 
 # Разрыв страницы перед этими файлами
-PAGE_BREAK_FILES = {"07_rating_in_hurghada.png", "08_activity.png"}
+PAGE_BREAK_FILES = {"07_rating_in_hurghada.png", "08_activity.png", "04_attendance.png"}
 
 # Регэксп для URL (не захватываем завершающие скобки/знаки препинания)
 URL_RE = re.compile(r"(https?://[^\s)]+)")

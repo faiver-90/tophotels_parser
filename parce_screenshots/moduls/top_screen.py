@@ -38,8 +38,12 @@ async def top_screen(page: Page, hotel_id, hotel_title=None):
             path=get_screenshot_path(hotel_id, hotel_title, "01_top_element.png")
         )
         element2 = await page.query_selector(POPULARS_LOCATOR)
+        old_viewport = page.viewport_size
+        await page.set_viewport_size({"width": 1550, "height": 1000})
         await element2.screenshot(
             path=get_screenshot_path(hotel_id, hotel_title, "02_populars_element.png")
         )
+        await page.set_viewport_size(old_viewport)
+
     except Exception as e:
         logging.exception(f"[top_screen] Ошибка при выполнении {url}")

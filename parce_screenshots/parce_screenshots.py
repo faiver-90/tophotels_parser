@@ -48,12 +48,12 @@ async def run():
                 title = await get_title_hotel(page, hotel_id)
 
                 await top_screen(page, hotel_id, title)
-                # count_review = await review_screen(page, hotel_id, title)
-                # await attendance(page, hotel_id, title)
-                # await dynamic_rating(page, hotel_id, title)
-                # await service_prices(page, hotel_id, title)
-                # await rating_hotels_in_hurghada(page, count_review, hotel_id, title)
-                # await last_activity(page, hotel_id, title)
+                count_review = await review_screen(page, hotel_id, title)
+                await attendance(page, hotel_id, title)
+                await dynamic_rating(page, hotel_id, title)
+                await service_prices(page, hotel_id, title)
+                await rating_hotels_in_hurghada(page, count_review, hotel_id, title)
+                await last_activity(page, hotel_id, title)
                 logging.info(f"✅ Готово: {hotel_id} ({title})")
             except Exception as e:
                 logging.exception(f"‼️ Ошибка при обработке отеля {hotel_id, title}")
