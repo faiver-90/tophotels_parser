@@ -7,7 +7,7 @@ from config_app import SCREENSHOTS_DIR
 from move_shot_to_word import create_formatted_doc
 from parce_screenshots import (
     run_create_report,
-)  # теперь он сам решит: concurrent/sequential
+)
 from utils import sleep_system
 
 if __name__ == "__main__":

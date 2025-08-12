@@ -122,10 +122,7 @@ async def safe_step(step_fn, *args, **kwargs):
 def sleep_system():
     system = platform.system()
     if system == "Windows":
-        # Спящий режим
-        os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
-        # Если нужен именно гибернация:
-        # os.system("shutdown /h")
+        os.system("rundll32.exe powrprof.dll,SetSuspendState Sleep")
     elif system == "Linux":
         os.system("systemctl suspend")
     elif system == "Darwin":  # macOS

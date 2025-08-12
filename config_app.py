@@ -1,19 +1,28 @@
 import logging
 import os
 from datetime import datetime
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from dotenv import load_dotenv
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 
-curr_month = datetime.now().strftime("%B")  # Полное название месяца, например "August"
-curr_year = datetime.now().strftime("%Y")  # Год строкой, например "2025"
+curr_month = datetime.now().strftime("%B")
+curr_year = datetime.now().strftime("%Y")
+
+file_handler = RotatingFileHandler(
+    SCRIPT_DIR / "script.log",
+    mode="a",
+    maxBytes=5 * 1024 * 1024,
+    backupCount=3,
+    encoding="utf-8"
+)
 
 logging.basicConfig(
     level=logging.INFO,
     format="[%(asctime)s] %(levelname)s: %(message)s",
     handlers=[
-        logging.FileHandler(SCRIPT_DIR / "script.log", mode="a", encoding="utf-8"),
+        file_handler,
         logging.StreamHandler(),
     ],
 )

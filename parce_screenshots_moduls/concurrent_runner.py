@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional, Iterable
 
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page
+from tqdm import tqdm
 
 from config_app import HOTELS_IDS_FILE, HEADLESS
 from auth_service import AuthService
@@ -28,7 +29,7 @@ from parce_screenshots_moduls.moduls.last_activity import last_activity
 from utils import safe_step  # твоя обёртка
 
 CONCURRENCY = int(os.getenv("CONCURRENCY", "1"))
-AUTH_STATE = Path("auth_state.json")
+AUTH_STATE = Path("../auth_state.json")
 
 
 async def login_once_and_save_state(browser: Browser) -> None:
@@ -70,7 +71,9 @@ async def process_hotel(page: Page, hotel_id: str) -> None:
     logging.info("✅ Готово: %s (%s)", hotel_id, title)
 
 
-async def worker(name: str, browser: Browser, queue: asyncio.Queue[str]) -> None:
+async def worker(
+    name: str, browser: Browser, queue: asyncio.Queue[str], pbar: tqdm
+) -> None:
     """Воркер: свой контекст и одна страница, берёт ID из очереди."""
     ctx = await make_context(browser)
     page = await ctx.new_page()
@@ -84,6 +87,7 @@ async def worker(name: str, browser: Browser, queue: asyncio.Queue[str]) -> None
             except Exception:
                 logging.exception("[%s] Ошибка при обработке %s", name, hotel_id)
             finally:
+                pbar.update(1)
                 queue.task_done()
     except asyncio.CancelledError:
         pass
@@ -138,25 +142,29 @@ async def run_concurrent(hotel_ids: Optional[list[str]] = None) -> None:
     if not hotel_ids:
         logging.error("Файл с ID пуст или некорректен.")
         return
+    try:
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=HEADLESS)
 
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=HEADLESS)
+            queue: asyncio.Queue[str] = asyncio.Queue()
+            for hid in hotel_ids:
+                queue.put_nowait(hid)
 
-        queue: asyncio.Queue[str] = asyncio.Queue()
-        for hid in hotel_ids:
-            queue.put_nowait(hid)
+            pbar = tqdm(total=len(hotel_ids), desc="Обработка отелей", unit="отель")
 
-        # Пул воркеров (каждый со своим контекстом/страницей)
-        n_workers = max(1, CONCURRENCY)
-        tasks = [
-            asyncio.create_task(worker(f"W{i + 1}", browser, queue))
-            for i in range(n_workers)
-        ]
+            n_workers = max(1, CONCURRENCY)
+            tasks = [
+                asyncio.create_task(worker(f"W{i + 1}", browser, queue, pbar))
+                for i in range(n_workers)
+            ]
 
-        await queue.join()
+            await queue.join()
+            pbar.close()
 
-        for t in tasks:
-            t.cancel()
-        await asyncio.gather(*tasks, return_exceptions=True)
-
+            for t in tasks:
+                t.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+    except Exception as e:
+        logging.exception(f"Ошибка при инициализации браузера: {e}")
+    finally:
         await browser.close()

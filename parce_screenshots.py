@@ -1,7 +1,6 @@
 import asyncio
 
-
-from concurrent_runner import hotels_needing_retry, run_concurrent, CONCURRENCY
+from parce_screenshots_moduls.concurrent_runner import hotels_needing_retry, run_concurrent
 from config_app import (
     HOTELS_IDS_FILE,
     SCREENSHOTS_DIR,
@@ -9,10 +8,7 @@ from config_app import (
     MAX_FIRST_RUN,
 )
 
-from parce_screenshots_moduls.utils import (
-    load_hotel_ids,
-    all_folders_have_count_images,
-)
+from parce_screenshots_moduls.utils import load_hotel_ids
 
 
 async def run_create_report():
@@ -31,12 +27,9 @@ async def run_create_report():
             print("✅ Всё уже собрано.")
             break
 
-        if CONCURRENCY > 1:
-            await run_concurrent(ids_for_run)  # ПАРАЛЛЕЛЬНО
+        await run_concurrent(ids_for_run)
 
-        if attempt >= MAX_FIRST_RUN and all_folders_have_count_images(
-            SCREENSHOTS_DIR, 8
-        ):
+        if attempt >= MAX_FIRST_RUN:
             # После нужного количества кругов — проверяем ещё раз
             left = hotels_needing_retry(
                 SCREENSHOTS_DIR, hotel_ids_all, required_files=8
