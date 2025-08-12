@@ -7,21 +7,26 @@ from typing import Optional, Iterable
 
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page
 
-from config_app import HOTELS_IDS_FILE, HEADLESS, SCREENSHOTS_DIR
+from config_app import HOTELS_IDS_FILE, HEADLESS
 from auth_service import AuthService
 
 from parce_screenshots_moduls.utils import (
-    load_hotel_ids, set_language_en, get_title_hotel,
+    load_hotel_ids,
+    set_language_en,
+    get_title_hotel,
 )
 from parce_screenshots_moduls.moduls.top_screen import top_screen
 from parce_screenshots_moduls.moduls.review_screen import review_screen
 from parce_screenshots_moduls.moduls.attendance import attendance
 from parce_screenshots_moduls.moduls.dynamic_rating import dynamic_rating
 from parce_screenshots_moduls.moduls.service_prices import service_prices
-from parce_screenshots_moduls.moduls.rating_hotels_in_hurghada import rating_hotels_in_hurghada
+from parce_screenshots_moduls.moduls.rating_hotels_in_hurghada import (
+    rating_hotels_in_hurghada,
+)
 from parce_screenshots_moduls.moduls.last_activity import last_activity
 
 from utils import safe_step  # твоя обёртка
+
 CONCURRENCY = int(os.getenv("CONCURRENCY", "1"))
 AUTH_STATE = Path("auth_state.json")
 
@@ -102,7 +107,9 @@ def _hotel_folder_matches(hotel_id: str, folder_name: str) -> bool:
     return folder_name.startswith(f"{hotel_id}_")
 
 
-def hotels_needing_retry(screens_dir: Path, hotel_ids: list[str], required_files: int = 8) -> list[str]:
+def hotels_needing_retry(
+    screens_dir: Path, hotel_ids: list[str], required_files: int = 8
+) -> list[str]:
     """Вернуть только те ID, у кого нет папки или < required_files картинок."""
     need: list[str] = []
     existing = [p.name for p in screens_dir.glob("*") if p.is_dir()]
@@ -112,7 +119,11 @@ def hotels_needing_retry(screens_dir: Path, hotel_ids: list[str], required_files
         if not fold:
             need.append(hid)
             continue
-        count_imgs = sum(1 for p in (screens_dir / fold).glob("*") if p.suffix.lower() in {".png", ".jpg", ".jpeg"})
+        count_imgs = sum(
+            1
+            for p in (screens_dir / fold).glob("*")
+            if p.suffix.lower() in {".png", ".jpg", ".jpeg"}
+        )
         if count_imgs < required_files:
             need.append(hid)
     return need
@@ -137,7 +148,10 @@ async def run_concurrent(hotel_ids: Optional[list[str]] = None) -> None:
 
         # Пул воркеров (каждый со своим контекстом/страницей)
         n_workers = max(1, CONCURRENCY)
-        tasks = [asyncio.create_task(worker(f"W{i+1}", browser, queue)) for i in range(n_workers)]
+        tasks = [
+            asyncio.create_task(worker(f"W{i + 1}", browser, queue))
+            for i in range(n_workers)
+        ]
 
         await queue.join()
 
