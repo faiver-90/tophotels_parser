@@ -92,6 +92,12 @@ async def worker(
     except asyncio.CancelledError:
         pass
     finally:
+        try:
+            os.remove("auth_state.json")
+        except FileNotFoundError:
+            pass
+        except OSError as e:
+            logging.warning("Не удалось удалить auth_state.json: %s", e)
         await page.close()
         await ctx.close()
 
