@@ -49,4 +49,4 @@ HEADLESS = os.getenv("HEADLESS", "True").strip().lower() == "true"
 MAX_ATTEMPTS_RUN = int(os.getenv("MAX_ATTEMPTS_RUN", 5))
 MAX_FIRST_RUN = int(os.getenv("MAX_FIRST_RUN", 2))
 
-SLEEP = os.getenv("SLEEP", "True").strip().lower() == "true"
+SLEEP = os.getenv("SLEEP", "False").strip().lower() == "true"

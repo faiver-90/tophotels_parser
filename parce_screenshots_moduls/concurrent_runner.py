@@ -29,7 +29,7 @@ from parce_screenshots_moduls.moduls.last_activity import last_activity
 from utils import safe_step  # твоя обёртка
 
 CONCURRENCY = int(os.getenv("CONCURRENCY", "1"))
-AUTH_STATE = Path("../auth_state.json")
+AUTH_STATE = Path("auth_state.json")
 
 
 async def login_once_and_save_state(browser: Browser) -> None:
@@ -81,7 +81,7 @@ async def worker(
     """Воркер: свой контекст и одна страница, берёт ID из очереди."""
     ctx = await make_context(browser)
     page = await ctx.new_page()
-    await set_language_en(page)
+    # await set_language_en(page)
     try:
         while True:
             hotel_id = await queue.get()
@@ -97,7 +97,7 @@ async def worker(
         pass
     finally:
         try:
-            os.remove("auth_state.json")
+            os.remove(AUTH_STATE)
         except FileNotFoundError:
             pass
         except OSError as e:

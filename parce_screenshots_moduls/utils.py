@@ -17,7 +17,7 @@ from parce_screenshots_moduls.delete_any_popup import nuke_poll_overlay
 from parce_screenshots_moduls.moduls.locators import (
     TG_HIDE_LOCATOR,
     FLAG_LOCATOR,
-    TITLE_HOTEL_LOCATOR,
+    TITLE_HOTEL_LOCATOR, EN_LANG_BUTTON_LOCATOR,
 )
 
 
@@ -38,7 +38,7 @@ def load_hotel_ids(file_path: str) -> List[str]:
 async def get_title_hotel(page: Page, hotel_id):
     try:
         url = BASE_URL_TH + "hotel/" + hotel_id
-        await goto_strict(page, url, nuke_overlays=nuke_poll_overlay, expect_url=url)
+        await goto_strict(page, url, nuke_overlays=nuke_poll_overlay, expect_url=url, timeout=70000)
 
         await page.wait_for_selector(
             TITLE_HOTEL_LOCATOR,
@@ -79,15 +79,14 @@ async def set_language_en(page: Page):
         await page.goto(BASE_URL_PRO, timeout=0)
 
         await page.wait_for_selector(FLAG_LOCATOR, state="visible", timeout=30000)
-
         await page.click(FLAG_LOCATOR)
 
         await page.wait_for_selector(
-            "#pp-lang:not(.hidden)", state="visible", timeout=30000
+            EN_LANG_BUTTON_LOCATOR, state="visible", timeout=30000
         )
 
         await page.wait_for_selector("#pp-lang:not(.hidden)", timeout=30000)
-        await page.click('#pp-lang li[data-key="en"]')
+        await page.click(EN_LANG_BUTTON_LOCATOR)
         await asyncio.sleep(3)
     except Exception as e:
         logging.exception(f"[set_language_en] Ошибка при выборе языка: {e}")
