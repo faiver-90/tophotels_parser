@@ -1,8 +1,11 @@
+import logging
 import os
 import ctypes
 
 import json
 from pathlib import Path
+
+from tenacity import RetryError
 
 from config_app import SCREENSHOTS_DIR
 
@@ -104,3 +107,12 @@ def save_link(hotel_id: str | int, hotel_title: str, key: str, url: str) -> None
             data = {}
     data[key] = url
     meta.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+async def safe_step(step_fn, *args, **kwargs):
+    try:
+        return await step_fn(*args, **kwargs)
+    except RetryError as e:
+        logging.error(f"{step_fn.__name__} упал по RetryError: {e}")
+    except Exception as e:
+        logging.exception(f"{step_fn.__name__} упал с ошибкой: {e}")
