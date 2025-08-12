@@ -10,6 +10,7 @@ from config_app import SCREENSHOTS_DIR, curr_month, curr_year
 from utils import get_desktop_dir, normalize_windows_path
 
 load_dotenv()
+hotel_id = 0
 
 mapping_paragraph = {
     '01_top_element.png': '',

@@ -1,4 +1,3 @@
-# config_app.py
 import logging
 import os
 from datetime import datetime
@@ -7,8 +6,8 @@ from dotenv import load_dotenv
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 
-curr_month = datetime.now().month
-curr_year = datetime.now().year
+curr_month = datetime.now().strftime("%B")  # Полное название месяца, например "August"
+curr_year = datetime.now().strftime("%Y")   # Год строкой, например "2025"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -23,12 +22,13 @@ load_dotenv()
 EMAIL = os.getenv('EMAIL')
 PASSWORD = os.getenv('PASSWORD')
 
-OUTPUT_FILE_COUNTER_REVIEW = 'hotel_questions.xlsx'
+
+OUTPUT_FILE_COUNTER_REVIEW = os.getenv('OUTPUT_FILE_COUNTER_REVIEW', 'hotel_questions.xlsx')
 
 SCREENSHOTS_DIR = SCRIPT_DIR / "screenshots"
 
-BASE_URL_RU = 'https://tophotels.ru/en/'
-BASE_URL_PRO = 'https://tophotels.pro/'
-HOTELS_IDS_FILE = 'ids.txt'
+BASE_URL_RU = os.getenv('BASE_URL_RU','https://tophotels.ru/en/')
+BASE_URL_PRO = os.getenv('BASE_URL_PRO','https://ssa.tophotels.pro/')
+HOTELS_IDS_FILE = os.getenv('HOTELS_IDS_FILE','ids.txt')
 
 MAX_ATTEMPTS_RUN = 20
