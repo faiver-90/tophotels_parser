@@ -9,6 +9,7 @@ from playwright.async_api import Page
 
 from config_app import BASE_URL_PRO, SCREENSHOTS_DIR
 from parce_screenshots.moduls.locators import ACTIVITY_LOCATOR
+from utils import get_screenshot_path
 
 
 @retry(
@@ -30,10 +31,13 @@ async def last_activity(page: Page, hotel_id, hotel_title=None):
         old_viewport = page.viewport_size
         await page.set_viewport_size({"width": 1400, "height": 1000})
 
-        screenshot_dir = os.path.join(SCREENSHOTS_DIR, hotel_title or "default")
-        os.makedirs(screenshot_dir, exist_ok=True)
+        # screenshot_dir = os.path.join(SCREENSHOTS_DIR, hotel_title or "default")
+        full_path = get_screenshot_path(
+            hotel_id, hotel_title, "08_activity.png"
+        )
+        # os.makedirs(screenshot_dir, exist_ok=True)
 
-        full_path = os.path.join(screenshot_dir, "08_activity.png")
+        # full_path = os.path.join(screenshot_dir, "08_activity.png")
 
         # Сделать скриншот элемента
         await element.screenshot(path=full_path)

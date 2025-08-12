@@ -10,5 +10,5 @@ if __name__ == "__main__":
     asyncio.run(run_create_report())
     create_formatted_doc()
 
-    if os.path.exists(SCREENSHOTS_DIR):
-        shutil.rmtree(SCREENSHOTS_DIR)
+    # if os.path.exists(SCREENSHOTS_DIR):
+    #     shutil.rmtree(SCREENSHOTS_DIR)

@@ -27,7 +27,7 @@ OUTPUT_FILE_COUNTER_REVIEW = os.getenv('OUTPUT_FILE_COUNTER_REVIEW', 'hotel_ques
 
 SCREENSHOTS_DIR = SCRIPT_DIR / "screenshots"
 
-BASE_URL_RU = os.getenv('BASE_URL_RU','https://tophotels.ru/en/')
+BASE_URL_TH = os.getenv('BASE_URL_TH', 'https://tophotels.ru/en/')
 BASE_URL_PRO = os.getenv('BASE_URL_PRO','https://ssa.tophotels.pro/')
 HOTELS_IDS_FILE = os.getenv('HOTELS_IDS_FILE','ids.txt')
 

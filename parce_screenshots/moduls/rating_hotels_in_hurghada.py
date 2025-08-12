@@ -1,43 +1,59 @@
-
 import logging
 
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
 from playwright.async_api import Error as PlaywrightError
 
 
-from config_app import BASE_URL_PRO, SCREENSHOTS_DIR
-from parce_screenshots.moduls.locators import ALL_TABLE_RATING_OVEREVIEW_LOCATOR, RATING_HOTEL_IN_HURGHADA_LOCATOR, \
-    REVIEW_10_LOCATOR, REVIEW_50_LOCATOR
+from config_app import BASE_URL_PRO
+from parce_screenshots.moduls.locators import (
+    ALL_TABLE_RATING_OVEREVIEW_LOCATOR,
+    RATING_HOTEL_IN_HURGHADA_LOCATOR,
+    REVIEW_10_LOCATOR,
+    REVIEW_50_LOCATOR,
+)
+from utils import get_screenshot_path
 
 
 @retry(
     stop=stop_after_attempt(3),
     wait=wait_fixed(2),
-    retry=retry_if_exception_type(PlaywrightError)
+    retry=retry_if_exception_type(PlaywrightError),
 )
 async def rating_hotels_in_hurghada(page, count_review, hotel_id, hotel_title=None):
-    'https://tophotels.pro/hotel/al52488/new_stat/rating-hotels'
-    url = BASE_URL_PRO + f'hotel/{hotel_id}' + '/new_stat/rating-hotels'
+    "https://tophotels.pro/hotel/al52488/new_stat/rating-hotels"
+    url = BASE_URL_PRO + f"hotel/{hotel_id}" + "/new_stat/rating-hotels"
 
     try:
         await page.goto(url, timeout=5000)
 
         page_content = await page.content()
         if "There is no data for the hotel" in page_content:
-            logging.warning(f"[{hotel_id}] Нет данных по отелю ({hotel_title}) — 'There is no data for the hotel'")
+            logging.warning(
+                f"[{hotel_id}] Нет данных по отелю ({hotel_title}) — 'There is no data for the hotel'"
+            )
             return
         if "To activate your business account, contact us" in page_content:
             try:
-                await page.wait_for_selector(ALL_TABLE_RATING_OVEREVIEW_LOCATOR, timeout=30000)
+                await page.wait_for_selector(
+                    ALL_TABLE_RATING_OVEREVIEW_LOCATOR, timeout=30000
+                )
                 element = await page.query_selector(ALL_TABLE_RATING_OVEREVIEW_LOCATOR)
 
                 if element is None:
-                    raise PlaywrightError("Элемент ALL_TABLE_RATING_OVEREVIEW_LOCATOR не найден")
+                    raise PlaywrightError(
+                        "Элемент ALL_TABLE_RATING_OVEREVIEW_LOCATOR не найден"
+                    )
 
-                await element.screenshot(path=f'{SCREENSHOTS_DIR}/{hotel_title or "default"}/07_rating_in_hurghada.png')
+                await element.screenshot(
+                    path=get_screenshot_path(
+                        hotel_id, hotel_title, "07_rating_in_hurghada.png"
+                    )
+                )
                 return
             except PlaywrightError as e:
-                logging.exception(f"❌ Не удалось найти элемент активности для отеля {hotel_id}: {e}")
+                logging.exception(
+                    f"❌ Не удалось найти элемент активности для отеля {hotel_id}: {e}"
+                )
                 return
 
         if 10 < int(count_review.replace(" ", "")) < 50:
@@ -45,21 +61,30 @@ async def rating_hotels_in_hurghada(page, count_review, hotel_id, hotel_title=No
         else:
             await page.click(REVIEW_50_LOCATOR)
 
-        await page.wait_for_selector(RATING_HOTEL_IN_HURGHADA_LOCATOR,
-                                     state="visible",
-                                     timeout=30000)
+        await page.wait_for_selector(
+            RATING_HOTEL_IN_HURGHADA_LOCATOR, state="visible", timeout=30000
+        )
 
         await page.wait_for_selector(RATING_HOTEL_IN_HURGHADA_LOCATOR)
         element = await page.query_selector(RATING_HOTEL_IN_HURGHADA_LOCATOR)
 
         if element:
-            await element.screenshot(path=f'{SCREENSHOTS_DIR}/{hotel_title or "default"}/07_rating_in_hurghada.png')
+            await element.screenshot(
+                path=get_screenshot_path(
+                    hotel_id, hotel_title, "07_rating_in_hurghada.png"
+                )
+            )
         else:
-            print(f"[!] Таблица рейтинга не найдена у отеля {hotel_id} на странице {url}")
+            print(
+                f"[!] Таблица рейтинга не найдена у отеля {hotel_id} на странице {url}"
+            )
     except Exception as e:
         element = await page.query_selector(ALL_TABLE_RATING_OVEREVIEW_LOCATOR)
         if element is None:
-            raise PlaywrightError(f"[{hotel_id}] Элемент не найден даже в except — повторяем попытку")
-        await element.screenshot(path=f'{SCREENSHOTS_DIR}/{hotel_title or "default"}/07_rating_in_hurghada.png')
+            raise PlaywrightError(
+                f"[{hotel_id}] Элемент не найден даже в except — повторяем попытку"
+            )
+        await element.screenshot(
+            path=get_screenshot_path(hotel_id, hotel_title, "07_rating_in_hurghada.png")
+        )
         logging.exception(f"[rating_hotels_in_hurghada] Ошибка при выполнении {url}")
-

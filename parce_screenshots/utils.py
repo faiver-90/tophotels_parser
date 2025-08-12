@@ -3,12 +3,16 @@ import logging
 import os
 
 from typing import List
+
+from docx.shared import Pt, RGBColor
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
 from playwright.async_api import Error as PlaywrightError
 
 from playwright.async_api import Page
 
-from config_app import BASE_URL_PRO, BASE_URL_RU
+from config_app import BASE_URL_PRO, BASE_URL_TH
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 
 from parce_screenshots.moduls.locators import TG_HIDE_LOCATOR, FLAG_LOCATOR
 
@@ -29,7 +33,7 @@ def load_hotel_ids(file_path: str) -> List[str]:
 )
 async def get_title_hotel(page: Page, hotel_id):
     try:
-        url = BASE_URL_RU + "hotel/" + hotel_id
+        url = BASE_URL_TH + "hotel/" + hotel_id
         await page.goto(url, timeout=0)
         await page.wait_for_selector('#container > div.topline > section.topline__info > a > h1',
                                      state="visible",
@@ -102,3 +106,4 @@ def all_folders_have_count_images(base_path: str, count_files_dir: int) -> bool:
             print(f"🔁 Folder '{folder}' has only {len(images)} images.")
             return False
     return True
+

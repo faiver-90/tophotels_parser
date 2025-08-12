@@ -5,26 +5,27 @@ from playwright.async_api import Error as PlaywrightError
 
 from playwright.async_api import Page
 
-from config_app import SCREENSHOTS_DIR, BASE_URL_RU
+from config_app import SCREENSHOTS_DIR, BASE_URL_TH
 from parce_screenshots.moduls.locators import REVIEW_LOCATOR, COUNT_REVIEW_LOCATOR
+from utils import get_screenshot_path
 
 
 @retry(
     stop=stop_after_attempt(3),
     wait=wait_fixed(2),
-    retry=retry_if_exception_type(PlaywrightError)
+    retry=retry_if_exception_type(PlaywrightError),
 )
 async def review_screen(page: Page, hotel_id, hotel_title=None):
     try:
-        'https://tophotels.ru/en/hotel/al27382/reviews'
-        url = BASE_URL_RU + "hotel/" + hotel_id + '/reviews'
+        "https://tophotels.ru/en/hotel/al27382/reviews"
+        url = BASE_URL_TH + "hotel/" + hotel_id + "/reviews"
         await page.goto(url, timeout=0)
-        await page.wait_for_selector(REVIEW_LOCATOR,
-                                     state="visible",
-                                     timeout=30000)
+        await page.wait_for_selector(REVIEW_LOCATOR, state="visible", timeout=30000)
 
         element = await page.query_selector(REVIEW_LOCATOR)
-        await element.screenshot(path=f'{SCREENSHOTS_DIR}/{hotel_title or "default"}/03_reviews.png')
+        await element.screenshot(
+            path=get_screenshot_path(hotel_id, hotel_title, "03_reviews.png")
+        )
 
         return await page.locator(COUNT_REVIEW_LOCATOR).text_content()
     except Exception as e:

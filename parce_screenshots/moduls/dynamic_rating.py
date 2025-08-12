@@ -8,6 +8,7 @@ from playwright.async_api import Error as PlaywrightError
 from playwright.async_api import Page
 
 from config_app import BASE_URL_PRO, SCREENSHOTS_DIR
+from utils import get_screenshot_path
 
 
 @retry(
@@ -84,8 +85,8 @@ async def dynamic_rating(page: Page, hotel_id, hotel_title=None):
             print(f"❌ Некорректная область скрина: {clip_area}")
             return
 
-        os.makedirs(f"{SCREENSHOTS_DIR}/{hotel_title or 'default'}", exist_ok=True)
-        path = f'{SCREENSHOTS_DIR}/{hotel_title or "default"}/05_dynamic_rating.png'
+        # os.makedirs(f"{SCREENSHOTS_DIR}/{hotel_title or 'default'}", exist_ok=True)
+        path = get_screenshot_path(hotel_id, hotel_title, "05_dynamic_rating.png")
 
         await page.screenshot(path=path, clip=clip_area)
     except Exception as e:
