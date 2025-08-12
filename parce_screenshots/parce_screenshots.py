@@ -29,7 +29,7 @@ async def run():
         return
 
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
+        browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(
             locale="en-US", viewport={"width": 1005, "height": 1000}
         )
