@@ -9,6 +9,7 @@ from playwright.async_api import Page
 from config_app import BASE_URL_PRO
 
 from parce_screenshots.delete_any_popup import nuke_poll_overlay
+from parce_screenshots.utils import goto_strict
 from utils import get_screenshot_path
 
 
@@ -22,12 +23,11 @@ async def dynamic_rating(page: Page, hotel_id, hotel_title=None):
 
     try:
         url = BASE_URL_PRO + "hotel/" + f"{hotel_id}/new_stat/dynamics#month"
-        await page.goto(url)
+        await goto_strict(page, url, nuke_overlays=nuke_poll_overlay, expect_url=url)
         await page.wait_for_selector(
             "#panel-month .bth__tbl", state="visible", timeout=10000
         )
         await page.wait_for_timeout(1000)
-        await nuke_poll_overlay(page)
 
         # Поиск заголовка нужного года
         header_locator = page.locator(

@@ -36,4 +36,6 @@ DELAY_FOR_DELETE = int(os.getenv('DELAY_FOR_DELETE', 500))
 RETRIES_FOR_DELETE_LOCATORS = int(os.getenv('RETRIES_FOR_DELETE_LOCATORS', 3))
 
 HEADLESS = os.getenv('HEADLESS', 'True').strip().lower() == 'true'
-MAX_ATTEMPTS_RUN = 20
+
+MAX_ATTEMPTS_RUN = int(os.getenv('MAX_ATTEMPTS_RUN', 5))
+MAX_FIRST_RUN = int(os.getenv('MAX_FIRST_RUN', 2))

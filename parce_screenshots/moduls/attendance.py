@@ -13,6 +13,7 @@ from parce_screenshots.moduls.locators import (
     INCORRECT_DATA_SELECTOR,
     ACTIVATION_REQUIRES_SELECTOR,
 )
+from parce_screenshots.utils import goto_strict
 from utils import get_screenshot_path
 
 
@@ -32,13 +33,11 @@ async def attendance(page: Page, hotel_id, hotel_title=None):
 
     try:
         for attempt in range(attempts):
-            await page.goto(url, timeout=0)
-
+            await goto_strict(page, url, nuke_overlays=nuke_poll_overlay, expect_url=url)
             # Ждём основной контент
             await page.wait_for_selector(
                 ATTENDANCE_LOCATOR, state="visible", timeout=30000
             )
-            await nuke_poll_overlay(page)
 
             # 1Проверка: "неверные данные"
             if await page.is_visible(INCORRECT_DATA_SELECTOR):

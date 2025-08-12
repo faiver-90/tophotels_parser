@@ -8,6 +8,7 @@ from playwright.async_api import Page
 from config_app import BASE_URL_TH
 from parce_screenshots.delete_any_popup import nuke_poll_overlay
 from parce_screenshots.moduls.locators import TOP_ELEMENT_LOCATOR, POPULARS_LOCATOR
+from parce_screenshots.utils import goto_strict
 from utils import get_screenshot_path
 
 
@@ -20,12 +21,11 @@ async def top_screen(page: Page, hotel_id, hotel_title=None):
     try:
         "https://tophotels.ru/en/hotel/al27382"
         url = BASE_URL_TH + "hotel/" + hotel_id
-        await page.goto(url, timeout=0)
+        await goto_strict(page, url, nuke_overlays=nuke_poll_overlay, expect_url=url)
 
         await page.wait_for_selector(
             TOP_ELEMENT_LOCATOR, state="visible", timeout=30000
         )
-        await nuke_poll_overlay(page)
 
         await page.wait_for_selector(POPULARS_LOCATOR, state="visible", timeout=30000)
 

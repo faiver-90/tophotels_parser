@@ -4,7 +4,7 @@ import logging
 from playwright.async_api import async_playwright
 from tqdm import tqdm
 
-from config_app import HOTELS_IDS_FILE, SCREENSHOTS_DIR, MAX_ATTEMPTS_RUN, HEADLESS
+from config_app import HOTELS_IDS_FILE, SCREENSHOTS_DIR, MAX_ATTEMPTS_RUN, HEADLESS, MAX_FIRST_RUN
 from auth_service import AuthService
 
 from parce_screenshots.utils import (
@@ -68,7 +68,7 @@ async def run_create_report():
         print(f"\n🌀 Attempt {attempt} of {MAX_ATTEMPTS_RUN}")
         await run()
 
-        if attempt > 2 and all_folders_have_count_images(SCREENSHOTS_DIR, 8):
+        if attempt > MAX_FIRST_RUN and all_folders_have_count_images(SCREENSHOTS_DIR, 8):
             print("✅ All folders contain at least 8 images.")
             break
         else:
