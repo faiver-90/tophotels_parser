@@ -29,6 +29,9 @@ async def run():
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(locale='en-US', viewport={"width": 1005, "height": 1000})
+
+        # context = await browser.new_context(locale='en-US', viewport={"width": 1210, "height": 1000}) для длинных второго скрина
+
         page = await context.new_page()
         try:
             await set_language_en(page)
@@ -45,12 +48,12 @@ async def run():
                 title = await get_title_hotel(page, hotel_id)
 
                 await top_screen(page, hotel_id, title)
-                count_review = await review_screen(page, hotel_id, title)
-                await attendance(page, hotel_id, title)
-                await dynamic_rating(page, hotel_id, title)
-                await service_prices(page, hotel_id, title)
-                await rating_hotels_in_hurghada(page, count_review, hotel_id, title)
-                await last_activity(page, hotel_id, title)
+                # count_review = await review_screen(page, hotel_id, title)
+                # await attendance(page, hotel_id, title)
+                # await dynamic_rating(page, hotel_id, title)
+                # await service_prices(page, hotel_id, title)
+                # await rating_hotels_in_hurghada(page, count_review, hotel_id, title)
+                # await last_activity(page, hotel_id, title)
                 logging.info(f"✅ Готово: {hotel_id} ({title})")
             except Exception as e:
                 logging.exception(f"‼️ Ошибка при обработке отеля {hotel_id, title}")

@@ -9,7 +9,7 @@ from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
-from docx.shared import Inches, Pt, RGBColor
+from docx.shared import Inches, Pt, RGBColor, Cm
 from dotenv import load_dotenv
 
 from config_app import SCREENSHOTS_DIR, curr_month, curr_year, BASE_URL_TH, BASE_URL_PRO
@@ -40,14 +40,25 @@ load_dotenv()
 # =========================
 # Вспомогательные функции
 # =========================
-def add_header_image(doc: Document, image_path: str | Path, width_inches: float = 2.0) -> None:
+
+
+def add_header_image(
+    doc: Document,
+    image_path: str | Path,
+    width_inches: float = 2.0,
+    top_margin_cm: float = 1.0,
+    bottom_margin_cm: float = 0.5,
+) -> None:
     """
-    Вставляет картинку в верхний колонтитул во всех секциях документа.
+    Вставляет картинку в верхний колонтитул во всех секциях документа
+    и задаёт отступы сверху и снизу.
 
     Args:
         doc: Объект Document (python-docx).
         image_path: Путь к картинке.
-        width_inches: Ширина картинки в дюймах (по умолчанию 2.0).
+        width_inches: Ширина картинки в дюймах.
+        top_margin_cm: Отступ от колонтитула до текста сверху.
+        bottom_margin_cm: Отступ снизу колонтитула (визуальный).
     """
     image_path = Path(image_path)
 
@@ -55,11 +66,21 @@ def add_header_image(doc: Document, image_path: str | Path, width_inches: float 
         raise FileNotFoundError(f"Файл {image_path} не найден.")
 
     for section in doc.sections:
+        section.header_distance = Cm(top_margin_cm)  # Отступ сверху
         header = section.header
-        paragraph = header.paragraphs[0] if header.paragraphs else header.add_paragraph()
-        paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER  # Центрируем
+        paragraph = (
+            header.paragraphs[0] if header.paragraphs else header.add_paragraph()
+        )
+        paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
         run = paragraph.add_run()
         run.add_picture(str(image_path), width=Inches(width_inches))
+
+        # Визуальный отступ снизу — пустой абзац
+        if bottom_margin_cm > 0:
+            empty_p = header.add_paragraph()
+            empty_p.paragraph_format.space_before = Pt(0)
+            empty_p.paragraph_format.space_after = Cm(bottom_margin_cm)
 
 
 def ensure_normal_style_arial(doc: Document) -> None:
@@ -210,7 +231,9 @@ def create_formatted_doc() -> None:
         mapping_paragraph = build_mapping(hotel_id, rating_url=rating_url)
 
         doc = Document()
-        add_header_image(doc, "th_logo/logo_2.jpg", width_inches=1)
+        add_header_image(
+            doc, "th_logo/logo_1.jpg", width_inches=1.5, bottom_margin_cm=0.2
+        )
 
         ensure_normal_style_arial(doc)
 
