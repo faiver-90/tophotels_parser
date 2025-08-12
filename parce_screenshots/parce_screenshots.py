@@ -43,7 +43,6 @@ async def run():
             try:
                 logging.info(f"⏳ Работаем с отелем {hotel_id}")
                 title = await get_title_hotel(page, hotel_id)
-                # os.makedirs(f"{SCREENSHOTS_DIR}/{hotel_id + '_' + title}", exist_ok=True)
 
                 await top_screen(page, hotel_id, title)
                 count_review = await review_screen(page, hotel_id, title)
@@ -72,3 +71,4 @@ async def run_create_report():
             await asyncio.sleep(1)  # Можно убрать или увеличить паузу при необходимости
     else:
         print("❌ Max attempts reached. Some folders still have less than 8 images.")
+

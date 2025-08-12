@@ -13,7 +13,7 @@ from docx.shared import Inches, Pt, RGBColor
 from dotenv import load_dotenv
 
 from config_app import SCREENSHOTS_DIR, curr_month, curr_year, BASE_URL_TH, BASE_URL_PRO
-from utils import get_desktop_dir, normalize_windows_path
+from utils import get_desktop_dir, normalize_windows_path, load_links
 
 # =========================
 # Константы и настройки
@@ -141,11 +141,9 @@ def add_text_with_links(
             set_run_arial(paragraph.add_run(tail), size_pt=font_size_pt)
 
 
-def build_mapping(hotel_id: int) -> Dict[str, str]:
-    """
-    Возвращает словарь 'имя_скрина -> подпись', зависящий от hotel_id.
-    """
+def build_mapping(hotel_id: int, *, rating_url: str | None = None) -> Dict[str, str]:
     base = BASE_URL_PRO + "hotel/" + str(hotel_id)
+    rating_url = rating_url or f"{base}/new_stat/rating-hotels"
     return {
         "01_top_element.png": "",
         "02_populars_element.png": "Popularity of the hotel",
@@ -153,7 +151,7 @@ def build_mapping(hotel_id: int) -> Dict[str, str]:
         "04_attendance.png": f"Hotel profile attendance by month: {base}/new_stat/attendance",
         "05_dynamic_rating.png": f"Dynamics of the rating & recommendation: {base}/new_stat/dynamics#month",
         "06_service_prices.png": f"Log of booking requests: {base}/booking/log",
-        "07_rating_in_hurghada.png": f"Ranking beyond other hotels in Hurghada – by rating: {base}/new_stat/rating-hotels",
+        "07_rating_in_hurghada.png": f"Ranking beyond other hotels in Hurghada – by rating: {rating_url}",
         "08_activity.png": f"Last page activity: {base}/activity/index",
     }
 
@@ -182,12 +180,13 @@ def create_formatted_doc() -> None:
     for folder_name in os.listdir(screenshots_dir):
         hotel_id, title_hotel = folder_name.split("_", 1)
         folder_path = screenshots_dir / folder_name
-        folder_name = title_hotel
         if not folder_path.is_dir():
             continue
 
+        links = load_links(hotel_id, title_hotel)
+        rating_url = links.get("rating_url")
         url_hotel = f"{BASE_URL_TH}hotel/{hotel_id}"
-        mapping_paragraph = build_mapping(hotel_id)
+        mapping_paragraph = build_mapping(hotel_id, rating_url=rating_url)
 
         doc = Document()
         ensure_normal_style_arial(doc)

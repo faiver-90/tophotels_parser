@@ -1,5 +1,7 @@
 import os
 import ctypes
+
+import json
 from pathlib import Path
 
 from config_app import SCREENSHOTS_DIR
@@ -51,7 +53,10 @@ def get_desktop_dir() -> Path:
         if p.exists():
             return p
     return home
+
+
 # -----------------------------------------------------------------
+
 
 def normalize_windows_path(path_str: str) -> Path:
     """Преобразует обычный путь Windows в безопасный Path."""
@@ -63,19 +68,42 @@ def normalize_windows_path(path_str: str) -> Path:
     cleaned = cleaned.replace("\\", "/")
     return Path(cleaned)
 
-def get_screenshot_path(hotel_id: str | int, hotel_title: str, filename: str) -> str:
-    """
-    Возвращает полный путь для сохранения скриншота.
 
-    Args:
-        hotel_id: ID отеля (число или строка).
-        hotel_title: Название отеля.
-        filename: Имя файла (например, '01_top_element.png').
+def get_hotel_folder(hotel_id: str | int, hotel_title: str) -> Path:
+    """Возвращает Path к папке отеля и гарантирует её наличие."""
+    folder = Path(SCREENSHOTS_DIR) / f"{hotel_id}_{hotel_title}"
+    folder.mkdir(parents=True, exist_ok=True)
+    print(folder)
+    return folder
 
-    Returns:
-        Полный путь (str) к файлу скриншота.
-    """
-    folder_name = f"{hotel_id}_{hotel_title}"
-    folder_path = Path(SCREENSHOTS_DIR) / folder_name
-    folder_path.mkdir(parents=True, exist_ok=True)
-    return str(folder_path / filename)
+
+def get_screenshot_path(hotel_id: str | int, hotel_title: str, filename: str) -> Path:
+    """Путь к файлу скриншота в папке отеля."""
+    return get_hotel_folder(hotel_id, hotel_title) / filename
+
+
+def load_links(hotel_id: str | int, hotel_title: str) -> dict:
+    """Читает links.json из папки отеля."""
+    meta = get_hotel_folder(hotel_id, hotel_title) / "links.json"
+    print(meta)
+    if meta.exists():
+        try:
+            return json.loads(meta.read_text(encoding="utf-8"))
+        except Exception:
+            return {}
+    return {}
+
+
+def save_link(hotel_id: str | int, hotel_title: str, key: str, url: str) -> None:
+    """Сохраняет ссылку в links.json в папке отеля."""
+    folder = get_hotel_folder(hotel_id, hotel_title)
+    meta = folder / "links.json"
+    print(meta)
+    data = {}
+    if meta.exists():
+        try:
+            data = json.loads(meta.read_text(encoding="utf-8"))
+        except Exception:
+            data = {}
+    data[key] = url
+    meta.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")

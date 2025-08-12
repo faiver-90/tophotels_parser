@@ -11,7 +11,7 @@ from parce_screenshots.moduls.locators import (
     REVIEW_10_LOCATOR,
     REVIEW_50_LOCATOR,
 )
-from utils import get_screenshot_path
+from utils import get_screenshot_path, save_link
 
 
 @retry(
@@ -67,6 +67,8 @@ async def rating_hotels_in_hurghada(page, count_review, hotel_id, hotel_title=No
 
         await page.wait_for_selector(RATING_HOTEL_IN_HURGHADA_LOCATOR)
         element = await page.query_selector(RATING_HOTEL_IN_HURGHADA_LOCATOR)
+        current_url = page.url
+        save_link(hotel_id, hotel_title, "rating_url", current_url)
 
         if element:
             await element.screenshot(
