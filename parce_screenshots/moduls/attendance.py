@@ -10,8 +10,9 @@ from config_app import BASE_URL_PRO, SCREENSHOTS_DIR
 from parce_screenshots.moduls.locators import (
     ATTENDANCE_LOCATOR,
     INCORRECT_DATA_SELECTOR,
-    ACTIVATION_REQUIRES_SELECTOR,
+    ACTIVATION_REQUIRES_SELECTOR, TG_LOCATOR, FLAG_ON_TABLE_FOR_DELETE,
 )
+from parce_screenshots.utils import delete_locator
 from utils import get_screenshot_path
 
 
@@ -37,6 +38,8 @@ async def attendance(page: Page, hotel_id, hotel_title=None):
             await page.wait_for_selector(
                 ATTENDANCE_LOCATOR, state="visible", timeout=30000
             )
+            await  delete_locator(page, TG_LOCATOR)
+            await delete_locator(page, FLAG_ON_TABLE_FOR_DELETE)
 
             # 1Проверка: "неверные данные"
             if await page.is_visible(INCORRECT_DATA_SELECTOR):

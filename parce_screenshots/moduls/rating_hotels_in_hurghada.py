@@ -3,14 +3,14 @@ import logging
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
 from playwright.async_api import Error as PlaywrightError
 
-
 from config_app import BASE_URL_PRO
 from parce_screenshots.moduls.locators import (
     ALL_TABLE_RATING_OVEREVIEW_LOCATOR,
     RATING_HOTEL_IN_HURGHADA_LOCATOR,
     REVIEW_10_LOCATOR,
-    REVIEW_50_LOCATOR,
+    REVIEW_50_LOCATOR, TG_LOCATOR, FLAG_ON_TABLE_FOR_DELETE,
 )
+from parce_screenshots.utils import delete_locator
 from utils import get_screenshot_path, save_link
 
 
@@ -25,6 +25,8 @@ async def rating_hotels_in_hurghada(page, count_review, hotel_id, hotel_title=No
 
     try:
         await page.goto(url, timeout=5000)
+        await delete_locator(page, TG_LOCATOR)
+        await delete_locator(page, FLAG_ON_TABLE_FOR_DELETE)
 
         page_content = await page.content()
         if "There is no data for the hotel" in page_content:

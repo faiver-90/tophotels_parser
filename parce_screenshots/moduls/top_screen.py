@@ -6,7 +6,8 @@ from playwright.async_api import Error as PlaywrightError
 from playwright.async_api import Page
 
 from config_app import SCREENSHOTS_DIR, BASE_URL_TH
-from parce_screenshots.moduls.locators import TOP_ELEMENT_LOCATOR, POPULARS_LOCATOR
+from parce_screenshots.moduls.locators import TOP_ELEMENT_LOCATOR, POPULARS_LOCATOR, TG_LOCATOR
+from parce_screenshots.utils import delete_locator
 from utils import get_screenshot_path
 
 
@@ -24,6 +25,8 @@ async def top_screen(page: Page, hotel_id, hotel_title=None):
         await page.wait_for_selector(
             TOP_ELEMENT_LOCATOR, state="visible", timeout=30000
         )
+        await delete_locator(page, TG_LOCATOR)
+
         await page.wait_for_selector(POPULARS_LOCATOR, state="visible", timeout=30000)
 
         element = await page.query_selector(TOP_ELEMENT_LOCATOR)

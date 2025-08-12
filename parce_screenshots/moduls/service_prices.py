@@ -7,8 +7,8 @@ from playwright.async_api import Error as PlaywrightError
 from playwright.async_api import Page
 
 from config_app import BASE_URL_PRO, SCREENSHOTS_DIR
-from parce_screenshots.moduls.locators import SERVICES_AND_PRICES_LOCATOR
-from parce_screenshots.utils import hide_tg
+from parce_screenshots.moduls.locators import SERVICES_AND_PRICES_LOCATOR, TG_LOCATOR, FLAG_ON_TABLE_FOR_DELETE
+from parce_screenshots.utils import hide_tg, delete_locator
 from utils import get_screenshot_path
 
 
@@ -24,6 +24,8 @@ async def service_prices(page: Page, hotel_id, hotel_title=None):
         await page.goto(url, timeout=0)
 
         await hide_tg(page)
+        await delete_locator(page, TG_LOCATOR)
+        await delete_locator(page, FLAG_ON_TABLE_FOR_DELETE)
 
         await asyncio.sleep(2)
 

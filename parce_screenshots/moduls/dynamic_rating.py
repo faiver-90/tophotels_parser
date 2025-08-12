@@ -8,6 +8,8 @@ from playwright.async_api import Error as PlaywrightError
 from playwright.async_api import Page
 
 from config_app import BASE_URL_PRO, SCREENSHOTS_DIR
+from parce_screenshots.moduls.locators import TG_LOCATOR, FLAG_ON_TABLE_FOR_DELETE
+from parce_screenshots.utils import delete_locator
 from utils import get_screenshot_path
 
 
@@ -24,6 +26,8 @@ async def dynamic_rating(page: Page, hotel_id, hotel_title=None):
         await page.goto(url)
         await page.wait_for_selector('#panel-month .bth__tbl', state="visible", timeout=10000)
         await page.wait_for_timeout(1000)
+        await delete_locator(page, TG_LOCATOR)
+        await delete_locator(page, FLAG_ON_TABLE_FOR_DELETE)
 
         # Поиск заголовка нужного года
         header_locator = page.locator(

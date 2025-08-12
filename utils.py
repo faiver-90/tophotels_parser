@@ -73,7 +73,6 @@ def get_hotel_folder(hotel_id: str | int, hotel_title: str) -> Path:
     """Возвращает Path к папке отеля и гарантирует её наличие."""
     folder = Path(SCREENSHOTS_DIR) / f"{hotel_id}_{hotel_title}"
     folder.mkdir(parents=True, exist_ok=True)
-    print(folder)
     return folder
 
 
@@ -85,7 +84,6 @@ def get_screenshot_path(hotel_id: str | int, hotel_title: str, filename: str) ->
 def load_links(hotel_id: str | int, hotel_title: str) -> dict:
     """Читает links.json из папки отеля."""
     meta = get_hotel_folder(hotel_id, hotel_title) / "links.json"
-    print(meta)
     if meta.exists():
         try:
             return json.loads(meta.read_text(encoding="utf-8"))
@@ -98,7 +96,6 @@ def save_link(hotel_id: str | int, hotel_title: str, key: str, url: str) -> None
     """Сохраняет ссылку в links.json в папке отеля."""
     folder = get_hotel_folder(hotel_id, hotel_title)
     meta = folder / "links.json"
-    print(meta)
     data = {}
     if meta.exists():
         try:

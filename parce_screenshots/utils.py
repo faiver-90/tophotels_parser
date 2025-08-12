@@ -14,7 +14,7 @@ from config_app import BASE_URL_PRO, BASE_URL_TH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
-from parce_screenshots.moduls.locators import TG_HIDE_LOCATOR, FLAG_LOCATOR
+from parce_screenshots.moduls.locators import TG_HIDE_LOCATOR, FLAG_LOCATOR, TG_LOCATOR
 
 
 def load_hotel_ids(file_path: str) -> List[str]:
@@ -107,3 +107,16 @@ def all_folders_have_count_images(base_path: str, count_files_dir: int) -> bool:
             return False
     return True
 
+
+async def delete_locator(page: Page, locator: str) -> None:
+    """
+    Удаляет все элементы, найденные по локатору, из DOM.
+    Если элемент не найден — ничего не делает.
+    """
+    elements = page.locator(locator)
+    count = await elements.count()
+    if count == 0:
+        return  # ничего не найдено — выходим
+
+    for i in range(count):
+        await elements.nth(i).evaluate("el => el.remove()")

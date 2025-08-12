@@ -8,7 +8,8 @@ from playwright.async_api import Error as PlaywrightError
 from playwright.async_api import Page
 
 from config_app import BASE_URL_PRO, SCREENSHOTS_DIR
-from parce_screenshots.moduls.locators import ACTIVITY_LOCATOR
+from parce_screenshots.moduls.locators import ACTIVITY_LOCATOR, TG_LOCATOR, FLAG_ON_TABLE_FOR_DELETE
+from parce_screenshots.utils import delete_locator
 from utils import get_screenshot_path
 
 
@@ -23,6 +24,8 @@ async def last_activity(page: Page, hotel_id, hotel_title=None):
         await page.goto(url, timeout=0)
 
         await page.wait_for_selector(ACTIVITY_LOCATOR, state="visible", timeout=30000)
+        await delete_locator(page, TG_LOCATOR)
+        await delete_locator(page, FLAG_ON_TABLE_FOR_DELETE)
 
         element = await page.query_selector(ACTIVITY_LOCATOR)
         if element is None:

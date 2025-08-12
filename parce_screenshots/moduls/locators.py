@@ -6,6 +6,7 @@ ACTIVITY_LOCATOR = '#tab-pjax-index > div.js-bth__tbl.js-act-long-view'
 RATING_HOTEL_IN_HURGHADA_LOCATOR = '.bth__scrolable-tbl .bth__table--bordering'
 SERVICES_AND_PRICES_LOCATOR = '#hotelProfileApp > table:nth-child(5)'
 TG_HIDE_LOCATOR = "section.js-block.thpro-tg-infoblock > i"
+TG_LOCATOR = 'body > div.page.page--blue > i'
 ALL_TABLE_RATING_OVEREVIEW_LOCATOR = '#tab-pjax-index > div > div.js-act-long-view'
 
 FLAG_LOCATOR = 'body > div.page > header > section > div.header__r-col.header__r-col--abs-right > div > div > button > i'
@@ -21,3 +22,4 @@ REVIEW_10_LOCATOR = '#tab-pjax-index > div > div.js-act-long-view > div:nth-chil
 
 REVIEW_50_LOCATOR = '#tab-pjax-index > div > div.js-act-long-view > div:nth-child(5) > table > tbody > ' \
                   'tr:nth-child(3) > td:nth-child(2) > a'
+FLAG_ON_TABLE_FOR_DELETE = '#yii-debug-toolbar > div.yii-debug-toolbarbar > div.yii-debug-toolbarblock.yii-debug-toolbar__title > a > img'
