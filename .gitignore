@@ -2,7 +2,7 @@
 .env
 .env.*          # .env.dev, .env.prod и т.п.
 *.env
-
+auth_state.json
 /screenshots/
 *reports*/
 # Python: кэш и временные файлы

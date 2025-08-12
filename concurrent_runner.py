@@ -1,0 +1,148 @@
+# concurrent_runner.py
+import asyncio
+import logging
+import os
+from pathlib import Path
+from typing import Optional, Iterable
+
+from playwright.async_api import async_playwright, Browser, BrowserContext, Page
+
+from config_app import HOTELS_IDS_FILE, HEADLESS, SCREENSHOTS_DIR
+from auth_service import AuthService
+
+from parce_screenshots_moduls.utils import (
+    load_hotel_ids, set_language_en, get_title_hotel,
+)
+from parce_screenshots_moduls.moduls.top_screen import top_screen
+from parce_screenshots_moduls.moduls.review_screen import review_screen
+from parce_screenshots_moduls.moduls.attendance import attendance
+from parce_screenshots_moduls.moduls.dynamic_rating import dynamic_rating
+from parce_screenshots_moduls.moduls.service_prices import service_prices
+from parce_screenshots_moduls.moduls.rating_hotels_in_hurghada import rating_hotels_in_hurghada
+from parce_screenshots_moduls.moduls.last_activity import last_activity
+
+from utils import safe_step  # твоя обёртка
+CONCURRENCY = int(os.getenv("CONCURRENCY", "1"))
+AUTH_STATE = Path("auth_state.json")
+
+
+async def login_once_and_save_state(browser: Browser) -> None:
+    """Одна авторизация → сохраняем storage_state в файл для последующего reuse."""
+    ctx = await browser.new_context()
+    page = await ctx.new_page()
+    try:
+        await set_language_en(page)
+        await AuthService(page).login()
+        await ctx.storage_state(path=str(AUTH_STATE))
+        logging.info("🔐 storage_state сохранён в %s", AUTH_STATE)
+    finally:
+        await ctx.close()
+
+
+async def make_context(browser: Browser) -> BrowserContext:
+    """Создаём контекст с загруженным storage_state (без повторного логина)."""
+    if not AUTH_STATE.exists():
+        await login_once_and_save_state(browser)
+    return await browser.new_context(
+        storage_state=str(AUTH_STATE),
+        locale="en-US",
+        viewport={"width": 1005, "height": 1000},
+    )
+
+
+async def process_hotel(page: Page, hotel_id: str) -> None:
+    """Полный пайплайн по одному отелю на своей странице."""
+    title: Optional[str] = await safe_step(get_title_hotel, page, hotel_id)
+
+    await safe_step(top_screen, page, hotel_id, title)
+    count_review = await safe_step(review_screen, page, hotel_id, title)
+    await safe_step(attendance, page, hotel_id, title)
+    await safe_step(dynamic_rating, page, hotel_id, title)
+    await safe_step(service_prices, page, hotel_id, title)
+    await safe_step(rating_hotels_in_hurghada, page, count_review, hotel_id, title)
+    await safe_step(last_activity, page, hotel_id, title)
+
+    logging.info("✅ Готово: %s (%s)", hotel_id, title)
+
+
+async def worker(name: str, browser: Browser, queue: asyncio.Queue[str]) -> None:
+    """Воркер: свой контекст и одна страница, берёт ID из очереди."""
+    ctx = await make_context(browser)
+    page = await ctx.new_page()
+    await set_language_en(page)
+    try:
+        while True:
+            hotel_id = await queue.get()
+            try:
+                logging.info("[%s] ▶ %s", name, hotel_id)
+                await process_hotel(page, hotel_id)
+            except Exception:
+                logging.exception("[%s] Ошибка при обработке %s", name, hotel_id)
+            finally:
+                queue.task_done()
+    except asyncio.CancelledError:
+        pass
+    finally:
+        await page.close()
+        await ctx.close()
+
+
+def _dedupe(seq: Iterable[str]) -> list[str]:
+    """Убираем повторы, сохраняя порядок."""
+    seen, out = set(), []
+    for x in seq:
+        if x not in seen:
+            seen.add(x)
+            out.append(x)
+    return out
+
+
+def _hotel_folder_matches(hotel_id: str, folder_name: str) -> bool:
+    # Папки у тебя вида "al233_Jaz Fayrouz" — сверяем префикс до подчёркивания
+    return folder_name.startswith(f"{hotel_id}_")
+
+
+def hotels_needing_retry(screens_dir: Path, hotel_ids: list[str], required_files: int = 8) -> list[str]:
+    """Вернуть только те ID, у кого нет папки или < required_files картинок."""
+    need: list[str] = []
+    existing = [p.name for p in screens_dir.glob("*") if p.is_dir()]
+    for hid in hotel_ids:
+        # ищем подходящую папку по префиксу
+        fold = next((f for f in existing if _hotel_folder_matches(hid, f)), None)
+        if not fold:
+            need.append(hid)
+            continue
+        count_imgs = sum(1 for p in (screens_dir / fold).glob("*") if p.suffix.lower() in {".png", ".jpg", ".jpeg"})
+        if count_imgs < required_files:
+            need.append(hid)
+    return need
+
+
+async def run_concurrent(hotel_ids: Optional[list[str]] = None) -> None:
+    """
+    Параллельная обработка.
+    Если hotel_ids не переданы — загружаем из файла.
+    """
+    hotel_ids = _dedupe(hotel_ids or load_hotel_ids(HOTELS_IDS_FILE))
+    if not hotel_ids:
+        logging.error("Файл с ID пуст или некорректен.")
+        return
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=HEADLESS)
+
+        queue: asyncio.Queue[str] = asyncio.Queue()
+        for hid in hotel_ids:
+            queue.put_nowait(hid)
+
+        # Пул воркеров (каждый со своим контекстом/страницей)
+        n_workers = max(1, CONCURRENCY)
+        tasks = [asyncio.create_task(worker(f"W{i+1}", browser, queue)) for i in range(n_workers)]
+
+        await queue.join()
+
+        for t in tasks:
+            t.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+
+        await browser.close()
