@@ -4,11 +4,10 @@ import os
 import shutil
 from time import perf_counter
 
-from config_app import SCREENSHOTS_DIR
+from config_app import SCREENSHOTS_DIR, SLEEP
 from move_shot_to_word import create_formatted_doc
-from parce_screenshots import (
-    run_create_report,
-)
+from parce_screenshots import run_create_report
+
 from utils import sleep_system
 
 if __name__ == "__main__":
@@ -19,4 +18,6 @@ if __name__ == "__main__":
     if os.path.exists(SCREENSHOTS_DIR):
         shutil.rmtree(SCREENSHOTS_DIR)
     logging.info("*" * 100)
-    sleep_system()
+
+    if SLEEP:
+        sleep_system()

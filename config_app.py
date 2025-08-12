@@ -15,7 +15,7 @@ file_handler = RotatingFileHandler(
     mode="a",
     maxBytes=5 * 1024 * 1024,
     backupCount=3,
-    encoding="utf-8"
+    encoding="utf-8",
 )
 
 logging.basicConfig(
@@ -41,10 +41,12 @@ BASE_URL_TH = os.getenv("BASE_URL_TH", "https://tophotels.ru/en/")
 BASE_URL_PRO = os.getenv("BASE_URL_PRO", "https://ssa.tophotels.pro/")
 HOTELS_IDS_FILE = os.getenv("HOTELS_IDS_FILE", "ids.txt")
 
-DELAY_FOR_DELETE = int(os.getenv('DELAY_FOR_DELETE', 500))
-RETRIES_FOR_DELETE_LOCATORS = int(os.getenv('RETRIES_FOR_DELETE_LOCATORS', 3))
+DELAY_FOR_DELETE = int(os.getenv("DELAY_FOR_DELETE", 500))
+RETRIES_FOR_DELETE_LOCATORS = int(os.getenv("RETRIES_FOR_DELETE_LOCATORS", 3))
 
-HEADLESS = os.getenv('HEADLESS', 'True').strip().lower() == 'true'
+HEADLESS = os.getenv("HEADLESS", "True").strip().lower() == "true"
 
-MAX_ATTEMPTS_RUN = int(os.getenv('MAX_ATTEMPTS_RUN', 5))
-MAX_FIRST_RUN = int(os.getenv('MAX_FIRST_RUN', 2))
+MAX_ATTEMPTS_RUN = int(os.getenv("MAX_ATTEMPTS_RUN", 5))
+MAX_FIRST_RUN = int(os.getenv("MAX_FIRST_RUN", 2))
+
+SLEEP = os.getenv("SLEEP", "True").strip().lower() == "true"

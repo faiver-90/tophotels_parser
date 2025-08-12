@@ -60,6 +60,10 @@ async def process_hotel(page: Page, hotel_id: str) -> None:
     """Полный пайплайн по одному отелю на своей странице."""
     title: Optional[str] = await safe_step(get_title_hotel, page, hotel_id)
 
+    if title is None:
+        logging.warning("⚠ Не удалось получить title для %s, пробуем ещё раз...", hotel_id)
+        title = await safe_step(get_title_hotel, page, hotel_id)
+
     await safe_step(top_screen, page, hotel_id, title)
     count_review = await safe_step(review_screen, page, hotel_id, title)
     await safe_step(attendance, page, hotel_id, title)

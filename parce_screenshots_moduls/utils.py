@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import os
 from pathlib import Path
 
 from typing import List
@@ -15,7 +14,11 @@ from playwright.async_api import Page, TimeoutError as PlaywrightTimeoutError
 from config_app import BASE_URL_PRO, BASE_URL_TH
 from parce_screenshots_moduls.delete_any_popup import nuke_poll_overlay
 
-from parce_screenshots_moduls.moduls.locators import TG_HIDE_LOCATOR, FLAG_LOCATOR
+from parce_screenshots_moduls.moduls.locators import (
+    TG_HIDE_LOCATOR,
+    FLAG_LOCATOR,
+    TITLE_HOTEL_LOCATOR,
+)
 
 
 def load_hotel_ids(file_path: str) -> List[str]:
@@ -36,18 +39,13 @@ async def get_title_hotel(page: Page, hotel_id):
     try:
         url = BASE_URL_TH + "hotel/" + hotel_id
         await goto_strict(page, url, nuke_overlays=nuke_poll_overlay, expect_url=url)
-        #
-        # await nuke_overlays(page)
-        # await nuke_overlays_once(page)
 
         await page.wait_for_selector(
-            "#container > div.topline > section.topline__info > a > h1",
+            TITLE_HOTEL_LOCATOR,
             state="visible",
             timeout=30000,
         )
-        element = await page.query_selector(
-            "#container > div.topline > section.topline__info > a > h1"
-        )
+        element = await page.query_selector(TITLE_HOTEL_LOCATOR)
         if element is None:
             raise PlaywrightError("title_hotel не найден")
         title = await element.text_content()
