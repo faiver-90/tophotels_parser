@@ -4,7 +4,7 @@ import logging
 from playwright.async_api import async_playwright
 from tqdm import tqdm
 
-from config_app import HOTELS_IDS_FILE, SCREENSHOTS_DIR, MAX_ATTEMPTS_RUN
+from config_app import HOTELS_IDS_FILE, SCREENSHOTS_DIR, MAX_ATTEMPTS_RUN, HEADLESS
 from auth_service import AuthService
 
 from parce_screenshots.utils import (
@@ -29,7 +29,7 @@ async def run():
         return
 
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        browser = await p.chromium.launch(headless=HEADLESS)
         context = await browser.new_context(
             locale="en-US", viewport={"width": 1005, "height": 1000}
         )

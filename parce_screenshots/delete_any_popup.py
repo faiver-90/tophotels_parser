@@ -3,14 +3,15 @@ import asyncio
 from typing import Iterable
 
 # ваши селекторы можно прокидывать наружу
+from config_app import DELAY_FOR_DELETE, RETRIES_FOR_DELETE_LOCATORS
 from parce_screenshots.moduls.locators import POLL_OVERLAY_SELECTORS
 
 
 async def nuke_poll_overlay(
         page: Page,
         selectors: Iterable[str] = POLL_OVERLAY_SELECTORS,
-        retries: int = 2,
-        delay_ms: int = 150,
+        retries: int = RETRIES_FOR_DELETE_LOCATORS,
+        delay_ms: int = DELAY_FOR_DELETE,
 ) -> int:
     """
     Универсально убирает попап/затемнение:

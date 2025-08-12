@@ -16,9 +16,11 @@ REVIEW_10_LOCATOR = '#tab-pjax-index > div > div.js-act-long-view > div:nth-chil
                     'tr:nth-child(2) > td:nth-child(2) > a'
 REVIEW_50_LOCATOR = '#tab-pjax-index > div > div.js-act-long-view > div:nth-child(5) > table > tbody > ' \
                     'tr:nth-child(3) > td:nth-child(2) > a'
+
 FLAG_ON_TABLE_FOR_DELETE = '#yii-debug-toolbar > div.yii-debug-toolbarbar > div.yii-debug-toolbarblock.yii-debug-toolbar__title > a > img'
 TG_LOCATOR = 'body > div.page.page--blue > i'
 TG_BODY_ADD = 'body > div.page.page--blue > section.js-block.thpro-tg-infoblock'
+
 POLL_OVERLAY_SELECTORS = [
     # точечно под ваш HTML
     ".lsfw-popup-wrap",
