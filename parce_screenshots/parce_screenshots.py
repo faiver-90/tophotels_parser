@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import os
 
 from playwright.async_api import async_playwright
 from tqdm import tqdm
@@ -8,9 +7,12 @@ from tqdm import tqdm
 from config_app import HOTELS_IDS_FILE, SCREENSHOTS_DIR, MAX_ATTEMPTS_RUN
 from auth_service import AuthService
 
-from parce_screenshots.moduls import review_screen
-from parce_screenshots.moduls import dynamic_rating, top_screen
-from parce_screenshots.utils import set_language_en, load_hotel_ids, get_title_hotel, all_folders_have_count_images
+from parce_screenshots.utils import (
+    set_language_en,
+    load_hotel_ids,
+    get_title_hotel,
+    all_folders_have_count_images,
+)
 from parce_screenshots.moduls.top_screen import top_screen
 from parce_screenshots.moduls.review_screen import review_screen
 from parce_screenshots.moduls.attendance import attendance
@@ -27,10 +29,10 @@ async def run():
         return
 
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        context = await browser.new_context(locale='en-US', viewport={"width": 1005, "height": 1000})
-
-        # context = await browser.new_context(locale='en-US', viewport={"width": 1210, "height": 1000}) для длинных второго скрина
+        browser = await p.chromium.launch(headless=False)
+        context = await browser.new_context(
+            locale="en-US", viewport={"width": 1005, "height": 1000}
+        )
 
         page = await context.new_page()
         try:
@@ -38,7 +40,7 @@ async def run():
             logging.info("Авторизация...")
             await AuthService(page).login()
             logging.info("Авторизация прошла.")
-        except Exception as e:
+        except Exception:
             logging.exception("Ошибка при авторизации.")
             return
 
@@ -55,7 +57,7 @@ async def run():
                 await rating_hotels_in_hurghada(page, count_review, hotel_id, title)
                 await last_activity(page, hotel_id, title)
                 logging.info(f"✅ Готово: {hotel_id} ({title})")
-            except Exception as e:
+            except Exception:
                 logging.exception(f"‼️ Ошибка при обработке отеля {hotel_id, title}")
 
         await browser.close()
@@ -74,4 +76,3 @@ async def run_create_report():
             await asyncio.sleep(1)  # Можно убрать или увеличить паузу при необходимости
     else:
         print("❌ Max attempts reached. Some folders still have less than 8 images.")
-

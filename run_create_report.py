@@ -1,8 +1,5 @@
 import asyncio
-import os
-import shutil
 
-from config_app import SCREENSHOTS_DIR
 from move_shot_to_word import create_formatted_doc
 from parce_screenshots.parce_screenshots import run_create_report
 

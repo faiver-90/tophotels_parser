@@ -5,9 +5,9 @@ from playwright.async_api import Error as PlaywrightError
 
 from playwright.async_api import Page
 
-from config_app import SCREENSHOTS_DIR, BASE_URL_TH
-from parce_screenshots.moduls.locators import REVIEW_LOCATOR, COUNT_REVIEW_LOCATOR, TG_LOCATOR, FLAG_ON_TABLE_FOR_DELETE
-from parce_screenshots.utils import delete_locator
+from config_app import BASE_URL_TH
+from parce_screenshots.delete_any_popup import nuke_poll_overlay
+from parce_screenshots.moduls.locators import REVIEW_LOCATOR, COUNT_REVIEW_LOCATOR
 from utils import get_screenshot_path
 
 
@@ -23,8 +23,7 @@ async def review_screen(page: Page, hotel_id, hotel_title=None):
         await page.goto(url, timeout=0)
 
         await page.wait_for_selector(REVIEW_LOCATOR, state="visible", timeout=30000)
-        await delete_locator(page, TG_LOCATOR)
-        await delete_locator(page, FLAG_ON_TABLE_FOR_DELETE)
+        await nuke_poll_overlay(page)
 
         element = await page.query_selector(REVIEW_LOCATOR)
         await element.screenshot(
@@ -32,5 +31,5 @@ async def review_screen(page: Page, hotel_id, hotel_title=None):
         )
 
         return await page.locator(COUNT_REVIEW_LOCATOR).text_content()
-    except Exception as e:
+    except Exception:
         logging.exception(f"[review_screen] Ошибка при выполнении {url}")

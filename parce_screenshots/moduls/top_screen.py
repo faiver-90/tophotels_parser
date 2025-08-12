@@ -5,9 +5,9 @@ from playwright.async_api import Error as PlaywrightError
 
 from playwright.async_api import Page
 
-from config_app import SCREENSHOTS_DIR, BASE_URL_TH
-from parce_screenshots.moduls.locators import TOP_ELEMENT_LOCATOR, POPULARS_LOCATOR, TG_LOCATOR
-from parce_screenshots.utils import delete_locator
+from config_app import BASE_URL_TH
+from parce_screenshots.delete_any_popup import nuke_poll_overlay
+from parce_screenshots.moduls.locators import TOP_ELEMENT_LOCATOR, POPULARS_LOCATOR
 from utils import get_screenshot_path
 
 
@@ -25,7 +25,7 @@ async def top_screen(page: Page, hotel_id, hotel_title=None):
         await page.wait_for_selector(
             TOP_ELEMENT_LOCATOR, state="visible", timeout=30000
         )
-        await delete_locator(page, TG_LOCATOR)
+        await nuke_poll_overlay(page)
 
         await page.wait_for_selector(POPULARS_LOCATOR, state="visible", timeout=30000)
 
@@ -45,5 +45,5 @@ async def top_screen(page: Page, hotel_id, hotel_title=None):
         )
         await page.set_viewport_size(old_viewport)
 
-    except Exception as e:
+    except Exception:
         logging.exception(f"[top_screen] Ошибка при выполнении {url}")

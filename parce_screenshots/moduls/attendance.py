@@ -6,13 +6,13 @@ from playwright.async_api import Error as PlaywrightError
 
 from playwright.async_api import Page
 
-from config_app import BASE_URL_PRO, SCREENSHOTS_DIR
+from config_app import BASE_URL_PRO
+from parce_screenshots.delete_any_popup import nuke_poll_overlay
 from parce_screenshots.moduls.locators import (
     ATTENDANCE_LOCATOR,
     INCORRECT_DATA_SELECTOR,
-    ACTIVATION_REQUIRES_SELECTOR, TG_LOCATOR, FLAG_ON_TABLE_FOR_DELETE,
+    ACTIVATION_REQUIRES_SELECTOR,
 )
-from parce_screenshots.utils import delete_locator
 from utils import get_screenshot_path
 
 
@@ -38,8 +38,7 @@ async def attendance(page: Page, hotel_id, hotel_title=None):
             await page.wait_for_selector(
                 ATTENDANCE_LOCATOR, state="visible", timeout=30000
             )
-            await  delete_locator(page, TG_LOCATOR)
-            await delete_locator(page, FLAG_ON_TABLE_FOR_DELETE)
+            await nuke_poll_overlay(page)
 
             # 1Проверка: "неверные данные"
             if await page.is_visible(INCORRECT_DATA_SELECTOR):
@@ -96,5 +95,5 @@ async def attendance(page: Page, hotel_id, hotel_title=None):
             logging.warning(
                 f"[attendance] После {attempts} попыток ошибка осталась. Сделан скрин ошибки."
             )
-    except Exception as e:
+    except Exception:
         logging.exception(f"[attendance] Ошибка при выполнении {url}")

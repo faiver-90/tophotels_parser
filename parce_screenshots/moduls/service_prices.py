@@ -6,9 +6,10 @@ from playwright.async_api import Error as PlaywrightError
 
 from playwright.async_api import Page
 
-from config_app import BASE_URL_PRO, SCREENSHOTS_DIR
-from parce_screenshots.moduls.locators import SERVICES_AND_PRICES_LOCATOR, TG_LOCATOR, FLAG_ON_TABLE_FOR_DELETE
-from parce_screenshots.utils import hide_tg, delete_locator
+from config_app import BASE_URL_PRO
+from parce_screenshots.delete_any_popup import nuke_poll_overlay
+from parce_screenshots.moduls.locators import SERVICES_AND_PRICES_LOCATOR
+from parce_screenshots.utils import hide_tg
 from utils import get_screenshot_path
 
 
@@ -24,8 +25,7 @@ async def service_prices(page: Page, hotel_id, hotel_title=None):
         await page.goto(url, timeout=0)
 
         await hide_tg(page)
-        await delete_locator(page, TG_LOCATOR)
-        await delete_locator(page, FLAG_ON_TABLE_FOR_DELETE)
+        await nuke_poll_overlay(page)
 
         await asyncio.sleep(2)
 
@@ -43,5 +43,5 @@ async def service_prices(page: Page, hotel_id, hotel_title=None):
             path=get_screenshot_path(hotel_id, hotel_title, "06_service_prices.png")
         )
         await page.set_viewport_size(old_viewport)
-    except Exception as e:
+    except Exception:
         logging.exception(f"[service_prices] Ошибка при выполнении {url}")
