@@ -1,10 +1,17 @@
 import logging
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
-from playwright.async_api import Error as PlaywrightError, Page, TimeoutError  # ⬅️ добавили TimeoutError
+from playwright.async_api import (
+    Error as PlaywrightError,
+    Page,
+    TimeoutError,
+)  # ⬅️ добавили TimeoutError
 
 from config_app import BASE_URL_TH, DELAY_FOR_DELETE, RETRIES_FOR_DELETE_LOCATORS
 from parce_screenshots_moduls.delete_any_popup import nuke_poll_overlay
-from parce_screenshots_moduls.moduls.locators import REVIEW_LOCATOR, COUNT_REVIEW_LOCATOR
+from parce_screenshots_moduls.moduls.locators import (
+    REVIEW_LOCATOR,
+    COUNT_REVIEW_LOCATOR,
+)
 from parce_screenshots_moduls.utils import goto_strict
 from utils import get_screenshot_path
 
@@ -44,24 +51,24 @@ async def review_screen(page: Page, hotel_id, hotel_title=None):
             )
             cnt_text = await page.locator(COUNT_REVIEW_LOCATOR).first.text_content()
             return (cnt_text or "").strip()
-
         except TimeoutError:
             needle = (
                 "Write a review and you will forever be the pioneer of this hotel, "
                 "just like Columbus of America!"
             )
+            needle_2 = "К сожалению, свежих отзывов об отеле нет."
+
             try:
-                await page.get_by_text(needle, exact=False).first.wait_for(timeout=500)
-                await page.locator("#container").screenshot(
-                    path=get_screenshot_path(hotel_id, hotel_title, "03_reviews.png")
+                await page.get_by_text(needle_2, exact=False).first.wait_for(
+                    timeout=500
                 )
-                return ""
             except TimeoutError:
-                await page.screenshot(
-                    path=get_screenshot_path(hotel_id, hotel_title, "03_reviews.png"),
-                    full_page=True,
-                )
-                return ""
+                await page.get_by_text(needle, exact=False).first.wait_for(timeout=500)
+
+            await page.locator("#container").screenshot(
+                path=get_screenshot_path(hotel_id, hotel_title, "03_reviews.png")
+            )
+            return ""
 
     except Exception:
         logging.exception(f"[review_screen] Ошибка при выполнении {url}")

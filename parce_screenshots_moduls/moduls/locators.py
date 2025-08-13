@@ -5,7 +5,8 @@ REVIEW_LOCATOR = (
     "#container > div.card-hotel-wrap.mt30 > section:nth-child(3) > div > section"
 )
 ATTENDANCE_LOCATOR = "#pg-container-stat > div:nth-child(1)"
-ACTIVITY_LOCATOR = "#tab-pjax-index > div.js-bth__tbl.js-act-long-view"
+ACTIVITY_TABLE_LOCATOR = "#tab-pjax-index > div.js-bth__tbl.js-act-long-view"
+ROW_ACTIVITY_TABLE_LOCATOR = "#events-list-table > tr"
 RATING_HOTEL_IN_HURGHADA_LOCATOR = ".bth__scrolable-tbl .bth__table--bordering"
 SERVICES_AND_PRICES_LOCATOR = "#hotelProfileApp > table:nth-child(5)"
 TG_HIDE_LOCATOR = "section.js-block.thpro-tg-infoblock > i"

@@ -9,7 +9,10 @@ from parce_screenshots_moduls.utils import goto_strict
 
 from config_app import BASE_URL_PRO, RETRIES_FOR_DELETE_LOCATORS, DELAY_FOR_DELETE
 from parce_screenshots_moduls.delete_any_popup import nuke_poll_overlay
-from parce_screenshots_moduls.moduls.locators import ACTIVITY_LOCATOR
+from parce_screenshots_moduls.moduls.locators import (
+    ACTIVITY_TABLE_LOCATOR,
+    ROW_ACTIVITY_TABLE_LOCATOR,
+)
 from utils import get_screenshot_path
 
 
@@ -25,7 +28,7 @@ async def last_activity(page: Page, hotel_id, hotel_title=None):
             page,
             url,
             wait_until="networkidle",
-            ready_selector=ACTIVITY_LOCATOR,
+            ready_selector=ACTIVITY_TABLE_LOCATOR,
             timeout=45000,
             retries=2,
             nuke_overlays=nuke_poll_overlay,
@@ -36,9 +39,11 @@ async def last_activity(page: Page, hotel_id, hotel_title=None):
             },
             expect_url=url,
         )
-        await page.wait_for_selector(ACTIVITY_LOCATOR, state="visible", timeout=30000)
+        await page.wait_for_selector(
+            ACTIVITY_TABLE_LOCATOR, state="visible", timeout=30000
+        )
 
-        element = await page.query_selector(ACTIVITY_LOCATOR)
+        element = await page.query_selector(ACTIVITY_TABLE_LOCATOR)
         if element is None:
             raise PlaywrightError("Элемент ACTIVITY_LOCATOR не найден")
 
@@ -46,16 +51,19 @@ async def last_activity(page: Page, hotel_id, hotel_title=None):
         await page.set_viewport_size({"width": 1400, "height": 1000})
 
         full_path = get_screenshot_path(hotel_id, hotel_title, "08_activity.png")
-
         # Сделать скриншот элемента
         await element.screenshot(path=full_path)
 
-        with Image.open(full_path) as img:
-            width, height = img.size
-            top_half = img.crop(
-                (0, 0, width, height // 2)
-            )  # (left, upper, right, lower)
-            top_half.save(full_path)
+        # Определить количество строк в таблице
+        row_count = await page.locator(ROW_ACTIVITY_TABLE_LOCATOR).count()
+        # Если строк больше двух — обрезаем
+        if row_count > 20:
+            with Image.open(full_path) as img:
+                width, height = img.size
+                top_half = img.crop(
+                    (0, 0, width, height // 2)
+                )  # Оставляем верхнюю половину
+                top_half.save(full_path)
 
         await page.set_viewport_size(old_viewport)
 
