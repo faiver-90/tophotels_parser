@@ -5,6 +5,7 @@
 auth_state.json
 /screenshots/
 *reports*/
+ids.txt
 # Python: кэш и временные файлы
 __pycache__/
 **/__pycache__/
