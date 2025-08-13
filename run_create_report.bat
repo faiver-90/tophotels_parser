@@ -1,117 +1,143 @@
-chcp 65001 >nul
 @echo off
-setlocal
+REM ==================================================================
+REM  Unified script (ASCII-only):
+REM    - chcp 65001 (optional UTF-8 in console)
+REM    - Ensure PowerShell ExecutionPolicy (CurrentUser -> RemoteSigned)
+REM    - Ensure Python present; install 3.12 x64 via winget if missing
+REM    - Create and activate local .venv next to this file
+REM    - pip install -r requirements.txt (if exists)
+REM    - pip install/upgrade playwright and install browsers
+REM    - Run run_create_report.py inside the venv
+REM    - Keep window open at the end
+REM ==================================================================
+
+setlocal EnableExtensions EnableDelayedExpansion
+chcp 65001 >nul
+
+REM 0) Go to script directory
 cd /d "%~dp0"
 
 echo =============================
-echo Checking for Python...
+echo Step 1: Execution Policy
 echo =============================
-
-REM Try to find Python
-set "PYTHON="
-py -c "import sys; print(sys.executable)" >nul 2>nul
-if not errorlevel 1 (
-    echo Python found via 'py'
-    set "PYTHON=py"
-)
-
-if not defined PYTHON (
-    python --version >nul 2>nul
-    if not errorlevel 1 (
-        echo Python found via 'python'
-        set "PYTHON=python"
-    )
-)
-
-if not defined PYTHON (
-    python3 --version >nul 2>nul
-    if not errorlevel 1 (
-        echo Python found via 'python3'
-        set "PYTHON=python3"
-    )
-)
-
-if not defined PYTHON (
-    echo Python not found. Downloading installer...
-
-    powershell -Command "Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/3.11.6/python-3.11.6-amd64.exe' -OutFile 'python_installer.exe'"
-    if not exist "python_installer.exe" (
-        echo Failed to download Python installer.
-        pause
-        exit /b
-    )
-
-    REM Silent install for all users; default path is %ProgramFiles%\Python311\
-    start /wait "" python_installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
-    del /q "python_installer.exe"
-
-    REM Use absolute path to freshly installed python to avoid PATH refresh issues
-    if exist "%ProgramFiles%\Python311\python.exe" (
-        set "PYTHON=%ProgramFiles%\Python311\python.exe"
-        echo Python installed at: %PYTHON%
-    ) else (
-        REM Fallback to user install location just in case
-        if exist "%LocalAppData%\Programs\Python\Python311\python.exe" (
-            set "PYTHON=%LocalAppData%\Programs\Python\Python311\python.exe"
-            echo Python installed at: %PYTHON%
-        ) else (
-            echo Python installation failed. Aborting.
-            pause
-            exit /b
-        )
-    )
+for /f "usebackq delims=" %%E in (`powershell -NoProfile -ExecutionPolicy Bypass -Command "try { (Get-ExecutionPolicy -Scope CurrentUser) } catch { 'Undefined' }"` ) do set "CURR_EP=%%E"
+if /I not "%CURR_EP%"=="RemoteSigned" if /I not "%CURR_EP%"=="Bypass" (
+  echo [*] Setting PowerShell ExecutionPolicy RemoteSigned for CurrentUser...
+  powershell -NoProfile -ExecutionPolicy Bypass -Command "Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force"
+) else (
+  echo [*] ExecutionPolicy already: %CURR_EP%
 )
 
 echo.
-echo Using Python: %PYTHON%
-
-REM === Create venv ===
-if not exist ".venv" (
-    echo Creating virtual environment...
-    "%PYTHON%" -m venv ".venv"
-    if errorlevel 1 (
-        echo Failed to create virtual environment.
-        pause
-        exit /b
-    )
+echo =============================
+echo Step 2: Python check/install
+echo =============================
+set "PY_EXE="
+where py >nul 2>&1 && set "PY_EXE=py"
+if not defined PY_EXE (
+  where python >nul 2>&1 && set "PY_EXE=python"
 )
-
-REM === Activate venv ===
-echo Activating virtual environment...
-call ".venv\Scripts\activate.bat"
-
-REM === Upgrade pip and install deps ===
-if exist "requirements.txt" (
-    echo Installing dependencies from requirements.txt...
-    ".venv\Scripts\python.exe" -m pip install --upgrade pip
-    if errorlevel 1 (
-        echo Failed to upgrade pip.
-        pause
-        exit /b
-    )
-    ".venv\Scripts\python.exe" -m pip install -r requirements.txt
-    if errorlevel 1 (
-        echo Failed to install dependencies.
-        pause
-        exit /b
-    )
+if not defined PY_EXE (
+  echo [*] Python not found. Trying to install Python 3.12 x64 via winget...
+  winget --version >nul 2>&1 || (
+    echo [!] winget is not available. Install Python 3.12 x64 manually and re-run.
+    goto :PAUSE_AND_EXIT_ERR
+  )
+  winget install -e --id Python.Python.3.12 --accept-package-agreements --accept-source-agreements
+  if errorlevel 1 (
+    echo [!] winget failed to install Python. Install manually and re-run.
+    goto :PAUSE_AND_EXIT_ERR
+  )
+  where py >nul 2>&1 && set "PY_EXE=py"
+  if not defined PY_EXE (
+    where python >nul 2>&1 && set "PY_EXE=python"
+  )
+  if not defined PY_EXE (
+    echo [!] Python still not available in PATH. Add it and re-run.
+    goto :PAUSE_AND_EXIT_ERR
+  )
 ) else (
-    echo requirements.txt not found. Skipping deps installation.
+  echo [*] Python found: %PY_EXE%
 )
 
-REM === Run your script ===
+echo.
 echo =============================
-echo Running: run_create_report.py
+echo Step 3: Create/activate .venv
 echo =============================
-".venv\Scripts\python.exe" "run_create_report.py"
+set "VENV_DIR=%cd%\.venv"
+if not exist "%VENV_DIR%\Scripts\python.exe" (
+  echo [*] Creating venv at "%VENV_DIR%"
+  "%PY_EXE%" -m venv "%VENV_DIR%"
+  if errorlevel 1 (
+    echo [!] Failed to create venv.
+    goto :PAUSE_AND_EXIT_ERR
+  )
+)
+call "%VENV_DIR%\Scripts\activate.bat"
 if errorlevel 1 (
-    echo Script exited with errors.
-    pause
-    exit /b
+  echo [!] Failed to activate venv.
+  goto :PAUSE_AND_EXIT_ERR
+)
+
+echo.
+echo =============================
+echo Step 4: pip upgrade and deps
+echo =============================
+python -m pip install --upgrade pip
+if errorlevel 1 echo [!] pip upgrade returned non-zero exit code.
+
+if exist "%cd%\requirements.txt" (
+  echo [*] Installing requirements.txt...
+  python -m pip install -r "%cd%\requirements.txt"
+  if errorlevel 1 (
+    echo [!] Failed to install requirements.txt.
+    goto :PAUSE_AND_EXIT_ERR
+  )
+) else (
+  echo [*] No requirements.txt found. Skipping.
+)
+
+echo.
+echo =============================
+echo Step 5: Playwright install
+echo =============================
+python -m pip install --upgrade playwright
+if errorlevel 1 (
+  echo [!] Failed to install Playwright via pip.
+  goto :PAUSE_AND_EXIT_ERR
+)
+python -m playwright install
+if errorlevel 1 (
+  echo [!] Failed to install Playwright browsers.
+  goto :PAUSE_AND_EXIT_ERR
+)
+
+echo.
+echo =============================
+echo Step 6: Run report
+echo =============================
+if exist "%cd%\run_create_report.py" (
+  python "run_create_report.py"
+  if errorlevel 1 (
+    echo [!] Script exited with errors.
+    goto :PAUSE_AND_EXIT_ERR
+  )
+) else (
+  echo [!] run_create_report.py not found in "%cd%".
+  goto :PAUSE_AND_EXIT_ERR
 )
 
 echo.
 echo All done.
+goto :PAUSE_AND_EXIT_OK
+
+:PAUSE_AND_EXIT_ERR
+echo.
+echo Finished with errors. Press any key to exit...
+pause >nul
+exit /b 1
+
+:PAUSE_AND_EXIT_OK
 echo Press any key to exit...
 pause >nul
-exit /b
+exit /b 0

@@ -81,7 +81,6 @@ async def worker(
     """Воркер: свой контекст и одна страница, берёт ID из очереди."""
     ctx = await make_context(browser)
     page = await ctx.new_page()
-    # await set_language_en(page)
     try:
         while True:
             hotel_id = await queue.get()
@@ -96,12 +95,13 @@ async def worker(
     except asyncio.CancelledError:
         pass
     finally:
-        # try:
-        #     os.remove(AUTH_STATE)
-        # except FileNotFoundError:
-        #     pass
-        # except OSError as e:
-        #     logging.warning("Не удалось удалить auth_state.json: %s", e)
+        # Удаляем, так как ТХ ПРО не видит регистрацию без проходки в регистрации
+        try:
+            os.remove(AUTH_STATE)
+        except FileNotFoundError:
+            pass
+        except OSError as e:
+            logging.warning("Не удалось удалить auth_state.json: %s", e)
         await page.close()
         await ctx.close()
 

@@ -57,7 +57,7 @@ async def last_activity(page: Page, hotel_id, hotel_title=None):
         # Определить количество строк в таблице
         row_count = await page.locator(ROW_ACTIVITY_TABLE_LOCATOR).count()
         # Если строк больше двух — обрезаем
-        if row_count > 20:
+        if row_count > 24 * 2:
             with Image.open(full_path) as img:
                 width, height = img.size
                 top_half = img.crop(
