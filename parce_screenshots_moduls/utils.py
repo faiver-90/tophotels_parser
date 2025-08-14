@@ -59,21 +59,6 @@ async def get_title_hotel(page: Page, hotel_id):
     wait=wait_fixed(2),
     retry=retry_if_exception_type(PlaywrightError),
 )
-async def hide_tg(page: Page):
-    locator = page.locator(TG_HIDE_LOCATOR)
-
-    try:
-        if await locator.is_visible():
-            await locator.click()
-    except Exception as e:
-        logging.exception(f"Клик на телеграм сломался, {e}")
-
-
-@retry(
-    stop=stop_after_attempt(3),
-    wait=wait_fixed(2),
-    retry=retry_if_exception_type(PlaywrightError),
-)
 async def set_language_en(page: Page):
     try:
         await page.goto(BASE_URL_PRO, timeout=0)
@@ -110,20 +95,20 @@ async def set_language_en(page: Page):
 #             print(f"🔁 Folder '{folder}' has only {len(images)} images.")
 #             return False
 #     return True
-
-
-async def delete_locator(page: Page, locator: str) -> None:
-    """
-    Удаляет все элементы, найденные по локатору, из DOM.
-    Если элемент не найден — ничего не делает.
-    """
-    elements = page.locator(locator)
-    count = await elements.count()
-    if count == 0:
-        return  # ничего не найдено — выходим
-
-    for i in range(count):
-        await elements.nth(i).evaluate("el => el.remove()")
+#
+#
+# async def delete_locator(page: Page, locator: str) -> None:
+#     """
+#     Удаляет все элементы, найденные по локатору, из DOM.
+#     Если элемент не найден — ничего не делает.
+#     """
+#     elements = page.locator(locator)
+#     count = await elements.count()
+#     if count == 0:
+#         return  # ничего не найдено — выходим
+#
+#     for i in range(count):
+#         await elements.nth(i).evaluate("el => el.remove()")
 
 
 async def safe_full_page_screenshot(page: Page, save_path: str | Path) -> bool:

@@ -183,11 +183,9 @@ def add_text_with_links(
             set_run_arial(paragraph.add_run(tail), size_pt=font_size_pt)
 
 
-def build_mapping(hotel_id: int, *, rating_url: str | None = None, title_hotel) -> Dict[str, str]:
+def build_mapping(hotel_id: int, *, rating_url: str | None = None, city) -> Dict[str, str]:
     base = BASE_URL_PRO + "hotel/" + str(hotel_id)
     rating_url = rating_url or f"{base}/new_stat/rating-hotels"
-    file = load_links(hotel_id, title_hotel)
-    city = file.get('city', 'City')
     return {
         "01_top_element.png": "",
         "02_populars_element.png": "Popularity of the hotel",
@@ -227,10 +225,12 @@ def create_formatted_doc() -> None:
         if not folder_path.is_dir():
             continue
 
-        links = load_links(hotel_id, title_hotel)
-        rating_url = links.get("rating_url")
+        json_file = load_links(hotel_id, title_hotel)
+        city = json_file.get('city', 'City')
+
+        rating_url = json_file.get("rating_url")
         url_hotel = f"{BASE_URL_TH}hotel/{hotel_id}"
-        mapping_paragraph = build_mapping(hotel_id, rating_url=rating_url, title_hotel=title_hotel)
+        mapping_paragraph = build_mapping(hotel_id, rating_url=rating_url, city=city)
 
         doc = Document()
         add_header_image(

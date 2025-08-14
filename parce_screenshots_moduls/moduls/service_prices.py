@@ -8,7 +8,7 @@ from parce_screenshots_moduls.moduls.locators import (
     SERVICES_AND_PRICES_LOCATOR,
     FALLBACK_CONTAINER_SERVICE_PRICES,
 )
-from parce_screenshots_moduls.utils import goto_strict
+from parce_screenshots_moduls.utils import goto_strict, safe_full_page_screenshot
 from utils import get_screenshot_path
 
 
@@ -62,7 +62,7 @@ async def service_prices(page: Page, hotel_id, hotel_title=None):
                 await cont.wait_for(state="visible", timeout=400)
                 await cont.screenshot(path=save_path, timeout=600)
             else:
-                await page.screenshot(path=save_path, full_page=True, timeout=1000)
+                await safe_full_page_screenshot(page, save_path)
         except Exception:
             logging.exception("[service_prices] Фолбэк-скрин не удался для %s", url)
 
