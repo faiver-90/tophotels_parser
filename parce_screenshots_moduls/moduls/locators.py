@@ -32,6 +32,7 @@ REVIEW_50_LOCATOR = (
 FALLBACK_CONTAINER_SERVICE_PRICES = (
     "body > div.page.page--blue > main"  # широкий контейнер на .pro
 )
+CITY_NAME_LOCATOR = '#tab-pjax-index > div > div.js-act-long-view > div:nth-child(5) > table > tbody > tr:nth-child(1) > td:nth-child(2)'
 
 FLAG_ON_TABLE_FOR_DELETE = "#yii-debug-toolbar > div.yii-debug-toolbarbar > div.yii-debug-toolbarblock.yii-debug-toolbar__title > a > img"
 TG_LOCATOR = "body > div.page.page--blue > i"
@@ -56,6 +57,7 @@ POLL_OVERLAY_SELECTORS = [
     "body > div.fixed-info-icons.no-select-text",
     "#pp-trip-poll-open",
     "#appThChumodan > section",
+    '//*[@id="appThChumodan"]/section',
     TG_BODY_ADD,
     TG_LOCATOR,
     FLAG_ON_TABLE_FOR_DELETE,

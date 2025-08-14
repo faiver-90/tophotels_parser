@@ -9,10 +9,10 @@ from parce_screenshots_moduls.moduls.locators import (
     ALL_TABLE_RATING_OVEREVIEW_LOCATOR,
     RATING_HOTEL_IN_HURGHADA_LOCATOR,
     REVIEW_10_LOCATOR,
-    REVIEW_50_LOCATOR,
+    REVIEW_50_LOCATOR, CITY_NAME_LOCATOR,
 )
 from parce_screenshots_moduls.utils import goto_strict
-from utils import get_screenshot_path, save_link
+from utils import get_screenshot_path, save_to_jsonfile
 
 
 @retry(
@@ -72,6 +72,12 @@ async def rating_hotels_in_hurghada(page, count_review, hotel_id, hotel_title=No
                 )
                 return
 
+        await page.wait_for_selector(CITY_NAME_LOCATOR, state="visible", timeout=300)
+        element_3 = await page.query_selector(CITY_NAME_LOCATOR)
+        city_raw: str = await element_3.text_content()
+        city = city_raw.strip().split('/')[-1].split(" ")[-1]
+        save_to_jsonfile(hotel_id, hotel_title, key='city', value=city)
+
         if 10 < int(count_review.replace(" ", "")) < 50:
             await page.click(REVIEW_10_LOCATOR)
         else:
@@ -84,7 +90,7 @@ async def rating_hotels_in_hurghada(page, count_review, hotel_id, hotel_title=No
         await page.wait_for_selector(RATING_HOTEL_IN_HURGHADA_LOCATOR)
         element = await page.query_selector(RATING_HOTEL_IN_HURGHADA_LOCATOR)
         current_url = page.url
-        save_link(hotel_id, hotel_title, "rating_url", current_url)
+        save_to_jsonfile(hotel_id, hotel_title, "rating_url", current_url)
 
         if element:
             await element.screenshot(

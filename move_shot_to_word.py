@@ -183,17 +183,19 @@ def add_text_with_links(
             set_run_arial(paragraph.add_run(tail), size_pt=font_size_pt)
 
 
-def build_mapping(hotel_id: int, *, rating_url: str | None = None) -> Dict[str, str]:
+def build_mapping(hotel_id: int, *, rating_url: str | None = None, title_hotel) -> Dict[str, str]:
     base = BASE_URL_PRO + "hotel/" + str(hotel_id)
     rating_url = rating_url or f"{base}/new_stat/rating-hotels"
+    file = load_links(hotel_id, title_hotel)
+    city = file.get('city', 'City')
     return {
         "01_top_element.png": "",
         "02_populars_element.png": "Popularity of the hotel",
         "03_reviews.png": "Rating and recommendations of hotel",
         "04_attendance.png": f"Hotel profile attendance by month: {base}/new_stat/attendance",
         "05_dynamic_rating.png": f"Dynamics of the rating & recommendation: {base}/new_stat/dynamics#month",
-        "06_service_prices.png": f"Log of booking requests: {base}/booking/log",
-        "07_rating_in_hurghada.png": f"Ranking beyond other hotels in Hurghada – by rating: {rating_url}",
+        "06_service_prices.png": f"Log of booking requests: {base}/stat/profile?group=day&vw=grouped",
+        "07_rating_in_hurghada.png": f"Ranking beyond other hotels in {city} – by rating: {rating_url}",
         "08_activity.png": f"Last page activity: {base}/activity/index",
     }
 
@@ -228,7 +230,7 @@ def create_formatted_doc() -> None:
         links = load_links(hotel_id, title_hotel)
         rating_url = links.get("rating_url")
         url_hotel = f"{BASE_URL_TH}hotel/{hotel_id}"
-        mapping_paragraph = build_mapping(hotel_id, rating_url=rating_url)
+        mapping_paragraph = build_mapping(hotel_id, rating_url=rating_url, title_hotel=title_hotel)
 
         doc = Document()
         add_header_image(

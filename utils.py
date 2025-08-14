@@ -96,17 +96,33 @@ def load_links(hotel_id: str | int, hotel_title: str) -> dict:
     return {}
 
 
-def save_link(hotel_id: str | int, hotel_title: str, key: str, url: str) -> None:
-    """Сохраняет ссылку в links.json в папке отеля."""
+def save_to_jsonfile(hotel_id: str | int, hotel_title: str, key: str, value: str) -> None:
+    """Сохраняет ссылку в links.json в папке отеля.
+    Если ключ уже есть:
+      - если значение одно, оно превращается в список
+      - если список, в него добавляется новый элемент
+    """
     folder = get_hotel_folder(hotel_id, hotel_title)
     meta = folder / "links.json"
     data = {}
+
     if meta.exists():
         try:
             data = json.loads(meta.read_text(encoding="utf-8"))
         except Exception:
             data = {}
-    data[key] = url
+
+    # добавляем значение по ключу
+    if key not in data:
+        data[key] = value
+    else:
+        # если уже список, добавляем
+        if isinstance(data[key], list):
+            data[key].append(value)
+        else:
+            # если было одно значение — превращаем в список
+            data[key] = [data[key], value]
+
     meta.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 

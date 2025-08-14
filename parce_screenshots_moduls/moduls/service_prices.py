@@ -13,8 +13,8 @@ from utils import get_screenshot_path
 
 
 @retry(
-    stop=stop_after_attempt(3),
-    wait=wait_fixed(2),
+    stop=stop_after_attempt(2),
+    wait=wait_fixed(0.5),
     retry=retry_if_exception_type(Exception),
 )
 async def service_prices(page: Page, hotel_id, hotel_title=None):
@@ -32,9 +32,9 @@ async def service_prices(page: Page, hotel_id, hotel_title=None):
             url,
             wait_until="networkidle",
             expect_url=url,  # точное совпадение
-            timeout=45000,
+            timeout=30000,
             retries=1,
-            retry_delay_ms=700,
+            retry_delay_ms=0,
             nuke_overlays=nuke_poll_overlay,
             overlays_kwargs={
                 "retries": RETRIES_FOR_DELETE_LOCATORS,
@@ -59,9 +59,10 @@ async def service_prices(page: Page, hotel_id, hotel_title=None):
         try:
             cont = page.locator(FALLBACK_CONTAINER_SERVICE_PRICES).first
             if await cont.count():
-                await cont.screenshot(path=save_path)
+                await cont.wait_for(state="visible", timeout=400)
+                await cont.screenshot(path=save_path, timeout=600)
             else:
-                await page.screenshot(path=save_path, full_page=True)
+                await page.screenshot(path=save_path, full_page=True, timeout=1000)
         except Exception:
             logging.exception("[service_prices] Фолбэк-скрин не удался для %s", url)
 
