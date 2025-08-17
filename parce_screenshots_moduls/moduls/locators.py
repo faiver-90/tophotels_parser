@@ -7,9 +7,8 @@ REVIEW_LOCATOR = (
 ATTENDANCE_LOCATOR = "#pg-container-stat > div:nth-child(1)"
 ACTIVITY_TABLE_LOCATOR = "#tab-pjax-index > div.js-bth__tbl.js-act-long-view"
 ROW_ACTIVITY_TABLE_LOCATOR = "#events-list-table > tr"
+RATING_HOTEL_IN_HURGHADA_LOCATOR = "//*[@id='tab-pjax-index']/div[4]"
 
-RATING_RESORT_IN_CITY_LINK_LOCATOR = '//*[@id="tab-pjax-index"]/div/div[2]/div[7]/table/tbody/tr[3]/td[2]/a'
-RATING_HOTEL_IN_HURGHADA_LOCATOR = "#tab-pjax-index > div:nth-child(3) > table"
 SERVICES_AND_PRICES_LOCATOR = "#hotelProfileApp > table:nth-child(5)"
 TG_HIDE_LOCATOR = "section.js-block.thpro-tg-infoblock > i"
 ALL_TABLE_RATING_OVEREVIEW_LOCATOR = "#tab-pjax-index > div > div.js-act-long-view"
@@ -23,14 +22,12 @@ INCORRECT_DATA_SELECTOR = (
     "#cstm-filter-frm > article > div.js-filter-info.filter-new__info-wrap"
 )
 ACTIVATION_REQUIRES_SELECTOR = "#pg-container-stat > div > table"
-# REVIEW_10_LOCATOR = (
-#     "#tab-pjax-index > div > div.js-act-long-view > div:nth-child(5) > table > tbody > "
-#     "tr:nth-child(2) > td:nth-child(2) > a"
-# )
-# REVIEW_50_LOCATOR = (
-#     "#tab-pjax-index > div > div.js-act-long-view > div:nth-child(5) > table > tbody > "
-#     "tr:nth-child(3) > td:nth-child(2) > a"
-# )
+REVIEW_10_LOCATOR = (
+    "//*[@id='tab-pjax-index']/div/div[2]/div[6]/table/tbody/tr[2]/td[2]/a"
+)
+REVIEW_50_LOCATOR = (
+    "//*[@id='tab-pjax-index']/div/div[2]/div[6]/table/tbody/tr[3]/td[2]/a"
+)
 FALLBACK_CONTAINER_SERVICE_PRICES = (
     "body > div.page.page--blue > main"  # широкий контейнер на .pro
 )

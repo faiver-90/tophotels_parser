@@ -9,9 +9,9 @@ from parce_screenshots_moduls.delete_any_popup import nuke_poll_overlay
 from parce_screenshots_moduls.moduls.locators import (
     ALL_TABLE_RATING_OVEREVIEW_LOCATOR,
     RATING_HOTEL_IN_HURGHADA_LOCATOR,
-    # REVIEW_10_LOCATOR,
-    # REVIEW_50_LOCATOR,
-    CITY_NAME_LOCATOR, RATING_RESORT_IN_CITY_LINK_LOCATOR,
+    CITY_NAME_LOCATOR,
+    REVIEW_10_LOCATOR,
+    REVIEW_50_LOCATOR,
 )
 from parce_screenshots_moduls.utils import goto_strict
 from utils import get_screenshot_path, save_to_jsonfile
@@ -22,7 +22,9 @@ from utils import get_screenshot_path, save_to_jsonfile
     wait=wait_fixed(2),
     retry=retry_if_exception_type(PlaywrightError),
 )
-async def rating_hotels_in_hurghada(page: Page, count_review, hotel_id, hotel_title=None):
+async def rating_hotels_in_hurghada(
+    page: Page, count_review, hotel_id, hotel_title=None
+):
     "https://tophotels.pro/hotel/al52488/new_stat/rating-hotels"
     url = BASE_URL_PRO + f"hotel/{hotel_id}" + "/new_stat/rating-hotels"
 
@@ -31,8 +33,7 @@ async def rating_hotels_in_hurghada(page: Page, count_review, hotel_id, hotel_ti
             page,
             url,
             wait_until="networkidle",
-            ready_selector=ALL_TABLE_RATING_OVEREVIEW_LOCATOR
-            or RATING_HOTEL_IN_HURGHADA_LOCATOR,
+            ready_selector=ALL_TABLE_RATING_OVEREVIEW_LOCATOR,
             timeout=45000,
             retries=2,
             nuke_overlays=nuke_poll_overlay,
@@ -77,15 +78,13 @@ async def rating_hotels_in_hurghada(page: Page, count_review, hotel_id, hotel_ti
         await page.wait_for_selector(CITY_NAME_LOCATOR, state="visible", timeout=300)
         element_3 = await page.query_selector(CITY_NAME_LOCATOR)
         city_raw: str = await element_3.text_content()
-        city = city_raw.strip().split('/')[-1].split(" ")[-1]
-        save_to_jsonfile(hotel_id, hotel_title, key='city', value=city)
+        city = city_raw.strip().split("/")[-1].split(" ")[-1]
+        save_to_jsonfile(hotel_id, hotel_title, key="city", value=city)
 
-        # if 10 < int(count_review.replace(" ", "")) < 50:
-        #     await page.click(REVIEW_10_LOCATOR)
-        # else:
-        #     await page.click(REVIEW_50_LOCATOR)
-
-        await page.click(RATING_RESORT_IN_CITY_LINK_LOCATOR)
+        if 10 < int(count_review.replace(" ", "")) < 50:
+            await page.click(REVIEW_10_LOCATOR)
+        else:
+            await page.click(REVIEW_50_LOCATOR)
 
         await page.wait_for_selector(
             RATING_HOTEL_IN_HURGHADA_LOCATOR, state="visible", timeout=30000

@@ -46,7 +46,7 @@ async def attendance(page: Page, hotel_id, hotel_title=None):
                     logging.warning(
                         f"[attendance] Предупреждение о данных на {hotel_id}. Попытка {attempt + 1} из {attempts}"
                     )
-                    await asyncio.sleep(2)
+                    await asyncio.sleep(5)
                     continue  # пробуем ещё раз
 
             # Проверка: "требуется активация"
