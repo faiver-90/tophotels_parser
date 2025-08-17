@@ -2,14 +2,16 @@ import logging
 
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
 from playwright.async_api import Error as PlaywrightError
+from playwright.async_api import Page
 
 from config_app import BASE_URL_PRO, RETRIES_FOR_DELETE_LOCATORS, DELAY_FOR_DELETE
 from parce_screenshots_moduls.delete_any_popup import nuke_poll_overlay
 from parce_screenshots_moduls.moduls.locators import (
     ALL_TABLE_RATING_OVEREVIEW_LOCATOR,
     RATING_HOTEL_IN_HURGHADA_LOCATOR,
-    REVIEW_10_LOCATOR,
-    REVIEW_50_LOCATOR, CITY_NAME_LOCATOR,
+    # REVIEW_10_LOCATOR,
+    # REVIEW_50_LOCATOR,
+    CITY_NAME_LOCATOR, RATING_RESORT_IN_CITY_LINK_LOCATOR,
 )
 from parce_screenshots_moduls.utils import goto_strict
 from utils import get_screenshot_path, save_to_jsonfile
@@ -20,7 +22,7 @@ from utils import get_screenshot_path, save_to_jsonfile
     wait=wait_fixed(2),
     retry=retry_if_exception_type(PlaywrightError),
 )
-async def rating_hotels_in_hurghada(page, count_review, hotel_id, hotel_title=None):
+async def rating_hotels_in_hurghada(page: Page, count_review, hotel_id, hotel_title=None):
     "https://tophotels.pro/hotel/al52488/new_stat/rating-hotels"
     url = BASE_URL_PRO + f"hotel/{hotel_id}" + "/new_stat/rating-hotels"
 
@@ -78,10 +80,12 @@ async def rating_hotels_in_hurghada(page, count_review, hotel_id, hotel_title=No
         city = city_raw.strip().split('/')[-1].split(" ")[-1]
         save_to_jsonfile(hotel_id, hotel_title, key='city', value=city)
 
-        if 10 < int(count_review.replace(" ", "")) < 50:
-            await page.click(REVIEW_10_LOCATOR)
-        else:
-            await page.click(REVIEW_50_LOCATOR)
+        # if 10 < int(count_review.replace(" ", "")) < 50:
+        #     await page.click(REVIEW_10_LOCATOR)
+        # else:
+        #     await page.click(REVIEW_50_LOCATOR)
+
+        await page.click(RATING_RESORT_IN_CITY_LINK_LOCATOR)
 
         await page.wait_for_selector(
             RATING_HOTEL_IN_HURGHADA_LOCATOR, state="visible", timeout=30000

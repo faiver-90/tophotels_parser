@@ -22,7 +22,7 @@ async def service_prices(page: Page, hotel_id, hotel_title=None):
     https://tophotels.pro/al/<id>/stat/profile?group=day&vw=grouped
     Делаем переход максимально «строгим» и устойчивым к оверлеям/медленной сети.
     """
-    url = f"{BASE_URL_PRO}al/{hotel_id[2:]}/stat/profile?group=day&vw=grouped"
+    url = f"{BASE_URL_PRO}al/{hotel_id[2:]}/stat/profile?group=week&vw=grouped"
     save_path = get_screenshot_path(hotel_id, hotel_title, "06_service_prices.png")
 
     try:

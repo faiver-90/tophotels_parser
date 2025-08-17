@@ -192,7 +192,7 @@ def build_mapping(hotel_id: int, *, rating_url: str | None = None, city) -> Dict
         "03_reviews.png": "Rating and recommendations of hotel",
         "04_attendance.png": f"Hotel profile attendance by month: {base}/new_stat/attendance",
         "05_dynamic_rating.png": f"Dynamics of the rating & recommendation: {base}/new_stat/dynamics#month",
-        "06_service_prices.png": f"Log of booking requests: {base}/stat/profile?group=day&vw=grouped",
+        "06_service_prices.png": f"Log of booking requests: {base}/stat/profile?group=week&vw=grouped",
         "07_rating_in_hurghada.png": f"Ranking beyond other hotels in {city} – by rating: {rating_url}",
         "08_activity.png": f"Last page activity: {base}/activity/index",
     }
