@@ -216,6 +216,21 @@ try {
 
     $fullPath = Resolve-Path -Path $RepoPath
     Write-Info "Repo path: $fullPath"
+    # Если нет .git — попробуем клонировать
+    if (-not (Test-IsGitRepo $fullPath)) {
+        Write-Warn "No .git found at $fullPath"
+        if (-not (Test-Path $fullPath)) {
+            New-Item -ItemType Directory -Path $fullPath -Force | Out-Null
+        }
+
+        Write-Info "Cloning repo into $fullPath ..."
+        git clone https://github.com/faiver-90/tophotels_parser.git $fullPath
+        if ($LASTEXITCODE -ne 0) {
+            Write-Err "git clone failed"
+            throw "git clone failed"
+        }
+    }
+
     if (-not (Test-IsGitRepo $fullPath)) { Write-Err "Not a git repo (no .git)"; throw "Not a git repo" }
 
     Push-Location $fullPath

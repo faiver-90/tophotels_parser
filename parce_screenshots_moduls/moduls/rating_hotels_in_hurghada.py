@@ -9,12 +9,12 @@ from parce_screenshots_moduls.delete_any_popup import nuke_poll_overlay
 from parce_screenshots_moduls.moduls.locators import (
     ALL_TABLE_RATING_OVEREVIEW_LOCATOR,
     RATING_HOTEL_IN_HURGHADA_LOCATOR,
-    CITY_NAME_LOCATOR,
+    CITY_NAME_AND_STAR_LOCATOR,
     REVIEW_10_LOCATOR,
     REVIEW_50_LOCATOR,
 )
 from parce_screenshots_moduls.utils import goto_strict
-from utils import get_screenshot_path, save_to_jsonfile
+from utils import get_screenshot_path, save_to_jsonfile, normalize_text
 
 
 @retry(
@@ -75,10 +75,15 @@ async def rating_hotels_in_hurghada(
                 )
                 return
 
-        await page.wait_for_selector(CITY_NAME_LOCATOR, state="visible", timeout=300)
-        element_3 = await page.query_selector(CITY_NAME_LOCATOR)
-        city_raw: str = await element_3.text_content()
-        city = city_raw.strip().split("/")[-1].split(" ")[-1]
+        await page.wait_for_selector(
+            CITY_NAME_AND_STAR_LOCATOR, state="visible", timeout=300
+        )
+        element_3 = await page.query_selector(CITY_NAME_AND_STAR_LOCATOR)
+        city_raw = await element_3.text_content()
+        parts = city_raw.split("/")
+        words = parts[-1].split()
+        last_two = words[-2:]
+        city = normalize_text(" ".join(last_two))
         save_to_jsonfile(hotel_id, hotel_title, key="city", value=city)
 
         if 10 < int(count_review.replace(" ", "")) < 50:

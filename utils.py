@@ -5,6 +5,8 @@ import ctypes
 import json
 from pathlib import Path
 import platform
+import re
+
 
 from tenacity import RetryError
 
@@ -96,7 +98,9 @@ def load_links(hotel_id: str | int, hotel_title: str) -> dict:
     return {}
 
 
-def save_to_jsonfile(hotel_id: str | int, hotel_title: str, key: str, value: str) -> None:
+def save_to_jsonfile(
+    hotel_id: str | int, hotel_title: str, key: str, value: str
+) -> None:
     """Сохраняет ссылку в links.json в папке отеля.
     Если ключ уже есть:
       - если значение одно, оно превращается в список
@@ -145,3 +149,25 @@ def sleep_system():
         os.system("pmset sleepnow")
     else:
         print("Неизвестная ОС, команда сна не выполнена")
+
+
+def normalize_text(text: str) -> str:
+    """
+    Убирает переносы строк, табы и лишние пробелы.
+    Возвращает текст с одним пробелом между словами.
+    """
+    if not text:
+        return ""
+    # \s+ = любой пробельный символ (пробел, таб, \n и т.д.)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def capitalize_sentences(text: str) -> str:
+    """
+    Делает первую букву каждого предложения (после точки, !, ?) заглавной.
+    """
+
+    def repl(match):
+        return match.group(1) + match.group(2).upper()
+
+    return re.sub(r"(^|[.!?]\s+)([a-zа-яё])", repl, text)

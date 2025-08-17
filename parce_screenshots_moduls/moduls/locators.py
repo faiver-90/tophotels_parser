@@ -8,6 +8,7 @@ ATTENDANCE_LOCATOR = "#pg-container-stat > div:nth-child(1)"
 ACTIVITY_TABLE_LOCATOR = "#tab-pjax-index > div.js-bth__tbl.js-act-long-view"
 ROW_ACTIVITY_TABLE_LOCATOR = "#events-list-table > tr"
 RATING_HOTEL_IN_HURGHADA_LOCATOR = "//*[@id='tab-pjax-index']/div[4]"
+NAME_RATING_TABLE_LOCATOR = '//*[@id="rty"]'
 
 SERVICES_AND_PRICES_LOCATOR = "#hotelProfileApp > table:nth-child(5)"
 TG_HIDE_LOCATOR = "section.js-block.thpro-tg-infoblock > i"
@@ -31,12 +32,12 @@ REVIEW_50_LOCATOR = (
 FALLBACK_CONTAINER_SERVICE_PRICES = (
     "body > div.page.page--blue > main"  # широкий контейнер на .pro
 )
-CITY_NAME_LOCATOR = '#tab-pjax-index > div > div.js-act-long-view > div:nth-child(5) > table > tbody > tr:nth-child(1) > td:nth-child(2)'
+CITY_NAME_AND_STAR_LOCATOR = '//*[@id="tab-pjax-index"]/div/div[2]/div[6]/table/tbody/tr[1]/td[2]/a'
 
 FLAG_ON_TABLE_FOR_DELETE = "#yii-debug-toolbar > div.yii-debug-toolbarbar > div.yii-debug-toolbarblock.yii-debug-toolbar__title > a > img"
 TG_LOCATOR = "body > div.page.page--blue > i"
 TG_BODY_ADD = "body > div.page.page--blue > section.js-block.thpro-tg-infoblock"
-
+WE_USE_COOKIES = '#cookie-agreement'
 POLL_OVERLAY_SELECTORS = [
     # точечно под ваш HTML
     ".lsfw-popup-wrap",
@@ -60,4 +61,5 @@ POLL_OVERLAY_SELECTORS = [
     TG_BODY_ADD,
     TG_LOCATOR,
     FLAG_ON_TABLE_FOR_DELETE,
+    WE_USE_COOKIES
 ]

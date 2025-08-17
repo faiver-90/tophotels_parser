@@ -183,7 +183,9 @@ def add_text_with_links(
             set_run_arial(paragraph.add_run(tail), size_pt=font_size_pt)
 
 
-def build_mapping(hotel_id: int, *, rating_url: str | None = None, city) -> Dict[str, str]:
+def build_mapping(
+    hotel_id: int, *, rating_url: str | None = None, city_stars: str
+) -> Dict[str, str]:
     base = BASE_URL_PRO + "hotel/" + str(hotel_id)
     rating_url = rating_url or f"{base}/new_stat/rating-hotels"
     return {
@@ -193,7 +195,8 @@ def build_mapping(hotel_id: int, *, rating_url: str | None = None, city) -> Dict
         "04_attendance.png": f"Hotel profile attendance by month: {base}/new_stat/attendance",
         "05_dynamic_rating.png": f"Dynamics of the rating & recommendation: {base}/new_stat/dynamics#month",
         "06_service_prices.png": f"Log of booking requests: {base}/stat/profile?group=week&vw=grouped",
-        "07_rating_in_hurghada.png": f"Ranking beyond other hotels in {city} – by rating: {rating_url}",
+        # "07_rating_in_hurghada.png": f"Ranking of {city}  {звездность} hotels by ratings over the last 2 years",
+        "07_rating_in_hurghada.png": f"Ranking of {city_stars} hotels by ratings over the last 2 years: {rating_url}",
         "08_activity.png": f"Last page activity: {base}/activity/index",
     }
 
@@ -226,11 +229,13 @@ def create_formatted_doc() -> None:
             continue
 
         json_file = load_links(hotel_id, title_hotel)
-        city = json_file.get('city', 'City')
+        city_stars = json_file.get("city", "City")
 
         rating_url = json_file.get("rating_url")
         url_hotel = f"{BASE_URL_TH}hotel/{hotel_id}"
-        mapping_paragraph = build_mapping(hotel_id, rating_url=rating_url, city=city)
+        mapping_paragraph = build_mapping(
+            hotel_id, rating_url=rating_url, city_stars=city_stars
+        )
 
         doc = Document()
         add_header_image(

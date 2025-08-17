@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
@@ -8,9 +7,9 @@ from playwright.async_api import Page
 
 from config_app import BASE_URL_TH
 from parce_screenshots_moduls.delete_any_popup import nuke_poll_overlay
-from parce_screenshots_moduls.moduls.locators import TOP_ELEMENT_LOCATOR, POPULARS_LOCATOR, CITY_NAME_LOCATOR
+from parce_screenshots_moduls.moduls.locators import TOP_ELEMENT_LOCATOR, POPULARS_LOCATOR
 from parce_screenshots_moduls.utils import goto_strict
-from utils import get_screenshot_path, save_to_jsonfile
+from utils import get_screenshot_path
 
 
 @retry(
