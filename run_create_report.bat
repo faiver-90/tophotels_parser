@@ -62,6 +62,25 @@ if not defined PY_EXE (
 
 echo.
 echo =============================
+echo Step 2.5: Git check/update
+echo =============================
+
+REM Absolute path to PS1 in bat_files
+set "PS1=%~dp0bat_files\setup_git_and_update.ps1"
+if not exist "%PS1%" (
+  echo [!] Missing: %PS1%
+  goto :PAUSE_AND_EXIT_ERR
+)
+
+REM Call PowerShell script directly (no wrapper BAT)
+powershell -NoProfile -ExecutionPolicy Bypass -File "%PS1%" -RepoPath "%cd%"
+if errorlevel 1 (
+  echo [!] Git setup/update failed.
+  goto :PAUSE_AND_EXIT_ERR
+)
+
+echo.
+echo =============================
 echo Step 3: Create/activate .venv
 echo =============================
 set "VENV_DIR=%cd%\.venv"
