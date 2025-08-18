@@ -9,6 +9,7 @@ ACTIVITY_TABLE_LOCATOR = "#tab-pjax-index > div.js-bth__tbl.js-act-long-view"
 ROW_ACTIVITY_TABLE_LOCATOR = "#events-list-table > tr"
 RATING_HOTEL_IN_HURGHADA_LOCATOR = "//*[@id='tab-pjax-index']/div[4]"
 NAME_RATING_TABLE_LOCATOR = '//*[@id="rty"]'
+NO_DATA_SELECTOR = 'body > div.page > div:nth-child(6) > div.w100p.content-booking'
 
 SERVICES_AND_PRICES_LOCATOR = "#hotelProfileApp > table:nth-child(5)"
 TG_HIDE_LOCATOR = "section.js-block.thpro-tg-infoblock > i"
