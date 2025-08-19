@@ -184,7 +184,7 @@ def add_text_with_links(
 
 
 def build_mapping(
-    hotel_id: int, *, rating_url: str | None = None, city_stars: str
+    hotel_id: int, *, rating_url: str | None = None, city: str, star: str
 ) -> Dict[str, str]:
     base = BASE_URL_PRO + "hotel/" + str(hotel_id)
     rating_url = rating_url or f"{base}/new_stat/rating-hotels"
@@ -196,19 +196,19 @@ def build_mapping(
         "05_dynamic_rating.png": f"Dynamics of the rating & recommendation: {base}/new_stat/dynamics#month",
         "06_service_prices.png": f"Log of booking requests: {base}/stat/profile?group=week&vw=grouped",
         # "07_rating_in_hurghada.png": f"Ranking of {city}  {звездность} hotels by ratings over the last 2 years",
-        "07_rating_in_hurghada.png": f"Ranking of {city_stars} hotels by ratings over the last 2 years: {rating_url}",
+        "07_rating_in_hurghada.png": f"Ranking of {city} {star} hotels by ratings over the last 2 years: {rating_url}",
         "08_activity.png": f"Last page activity: {base}/activity/index",
     }
 
 
-def build_reports_dir(curr_year: str, curr_month: str) -> Path:
+def build_reports_dir(curr_year: str, curr_month: str, city: str) -> Path:
     """
     Строит директорию для отчётов:
     либо из ENV PATH_FOR_REPORTS, либо на рабочем столе.
     """
     raw_path = os.getenv("PATH_FOR_REPORTS")
     base_dir = normalize_windows_path(raw_path) if raw_path else get_desktop_dir()
-    reports = Path(base_dir) / "TopHotels Reports" / f"{curr_year}" / f"{curr_month}"
+    reports = Path(base_dir) / "TopHotels Reports" / f"{curr_year}" / f"{curr_month}" / f"{city}"
     reports.mkdir(parents=True, exist_ok=True)
     return reports
 
@@ -219,7 +219,6 @@ def build_reports_dir(curr_year: str, curr_month: str) -> Path:
 
 
 def create_formatted_doc() -> None:
-    reports_dir = build_reports_dir(curr_year, curr_month)
     screenshots_dir = Path(SCREENSHOTS_DIR)
 
     for folder_name in os.listdir(screenshots_dir):
@@ -229,12 +228,14 @@ def create_formatted_doc() -> None:
             continue
 
         json_file = load_links(hotel_id, title_hotel)
-        city_stars = json_file.get("city", "City")
 
+        city = json_file.get("city", "City")
+        reports_dir = build_reports_dir(curr_year, curr_month, city)
+        star = json_file.get("star", "*")
         rating_url = json_file.get("rating_url")
         url_hotel = f"{BASE_URL_TH}hotel/{hotel_id}"
         mapping_paragraph = build_mapping(
-            hotel_id, rating_url=rating_url, city_stars=city_stars
+            hotel_id, rating_url=rating_url, city=city, star=star
         )
 
         doc = Document()

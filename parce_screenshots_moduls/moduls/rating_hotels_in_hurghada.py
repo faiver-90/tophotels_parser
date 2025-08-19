@@ -103,8 +103,10 @@ async def rating_hotels_in_hurghada(page: Page, count_review: str, hotel_id: str
         parts = [p.strip() for p in city_raw.split("/") if p.strip()]
         last_part = parts[-1] if parts else city_raw
         words = last_part.split()
-        city = normalize_text(" ".join(words[-2:]) if len(words) >= 2 else last_part)
+        city = normalize_text(" ".join(words[-2:]) if len(words) >= 2 else last_part)[:-2].strip()
+        star = normalize_text(" ".join(words[-2:]) if len(words) >= 2 else last_part)[-2:].strip()
         save_to_jsonfile(hotel_id, hotel_title, key="city", value=city)
+        save_to_jsonfile(hotel_id, hotel_title, key="star", value=star)
 
         # Переключатель по количеству отзывов
         reviews_num = int(count_review.replace(" ", "") or "0")
