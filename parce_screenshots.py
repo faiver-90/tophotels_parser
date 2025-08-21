@@ -21,7 +21,7 @@ async def run_create_report():
         ids_for_run = (
             hotel_ids_all
             if attempt == 1
-            else hotels_needing_retry(SCREENSHOTS_DIR, hotel_ids_all, required_files=8)
+            else hotels_needing_retry(SCREENSHOTS_DIR, hotel_ids_all)
         )
         if not ids_for_run:
             print("✅ Всё уже собрано.")
@@ -32,7 +32,7 @@ async def run_create_report():
         if attempt >= MAX_FIRST_RUN:
             # После нужного количества кругов — проверяем ещё раз
             left = hotels_needing_retry(
-                SCREENSHOTS_DIR, hotel_ids_all, required_files=8
+                SCREENSHOTS_DIR, hotel_ids_all
             )
             if not left:
                 print("✅ All folders contain at least 8 images.")
