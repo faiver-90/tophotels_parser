@@ -15,6 +15,10 @@ from dotenv import load_dotenv
 from config_app import SCREENSHOTS_DIR, curr_month, curr_year, BASE_URL_TH, BASE_URL_PRO
 from utils import get_desktop_dir, normalize_windows_path, load_links
 
+import base64
+import mimetypes
+from html import escape
+
 # =========================
 # Константы и настройки
 # =========================
@@ -184,7 +188,7 @@ def add_text_with_links(
 
 
 def build_mapping(
-    hotel_id: int, *, rating_url: str | None = None, city_stars: str
+    hotel_id: int, *, rating_url: str | None = None, city: str, star: str
 ) -> Dict[str, str]:
     base = BASE_URL_PRO + "hotel/" + str(hotel_id)
     rating_url = rating_url or f"{base}/new_stat/rating-hotels"
@@ -193,24 +197,116 @@ def build_mapping(
         "02_populars_element.png": "Popularity of the hotel",
         "03_reviews.png": "Rating and recommendations of hotel",
         "04_attendance.png": f"Hotel profile attendance by month: {base}/new_stat/attendance",
-        "05_dynamic_rating.png": f"Dynamics of the rating & recommendation: {base}/new_stat/dynamics#month",
+        # "05_dynamic_rating.png": f"Dynamics of the rating & recommendation: {base}/new_stat/dynamics#month",
         "06_service_prices.png": f"Log of booking requests: {base}/stat/profile?group=week&vw=grouped",
         # "07_rating_in_hurghada.png": f"Ranking of {city}  {звездность} hotels by ratings over the last 2 years",
-        "07_rating_in_hurghada.png": f"Ranking of {city_stars} hotels by ratings over the last 2 years: {rating_url}",
+        "07_rating_in_hurghada.png": f"Ranking of {city} {star} hotels by ratings over the last 2 years: {rating_url}",
         "08_activity.png": f"Last page activity: {base}/activity/index",
     }
 
 
-def build_reports_dir(curr_year: str, curr_month: str) -> Path:
+def build_reports_dir(curr_year: str, curr_month: str, city: str) -> Path:
     """
     Строит директорию для отчётов:
     либо из ENV PATH_FOR_REPORTS, либо на рабочем столе.
     """
     raw_path = os.getenv("PATH_FOR_REPORTS")
     base_dir = normalize_windows_path(raw_path) if raw_path else get_desktop_dir()
-    reports = Path(base_dir) / "TopHotels Reports" / f"{curr_year}" / f"{curr_month}"
+    reports = (
+        Path(base_dir)
+        / "TopHotels Reports"
+        / f"{curr_year}"
+        / f"{curr_month}"
+        / f"{city}"
+    )
     reports.mkdir(parents=True, exist_ok=True)
     return reports
+
+
+# =========================
+#  Convert to html
+# =========================
+def _linkify(text: str) -> str:
+    """
+    Превращает URL в кликабельные <a>…</a> для HTML.
+    Простая версия — достаточно для ваших подписей.
+    """
+    if not text:
+        return ""
+    return re.sub(
+        r"(https?://[^\s)]+)", r'<a href="\1" target="_blank">\1</a>', escape(text)
+    )
+
+
+def _img_to_data_uri(path: Path) -> str:
+    """
+    Читает изображение и возвращает data:URI для встраивания в HTML.
+    """
+    mime, _ = mimetypes.guess_type(path.name)
+    if not mime:
+        mime = "application/octet-stream"
+    data = base64.b64encode(path.read_bytes()).decode("ascii")
+    return f"data:{mime};base64,{data}"
+
+
+def _build_inline_html(
+    title_hotel: str,
+    url_hotel: str,
+    mapping_paragraph: Dict[str, str],
+    folder_path: Path,
+) -> str:
+    """
+    Собирает HTML-страницу отчёта с inline-картинками (data:URI).
+    Ширину картинок берём как у DOCX (IMAGE_WIDTH_INCHES ≈ 96px/inch).
+    """
+    max_width_px = int(IMAGE_WIDTH_INCHES * 96)
+
+    # очень лёгкие стили, безопасные для почтовых клиентов
+    css = f"""
+    body{{font-family:Arial,Helvetica,sans-serif; color:#111;}}
+    .wrap{{max-width:{max_width_px + 40}px; margin:24px auto;}}
+    h1, h2, h3{{margin:8px 0; text-align:center}}
+    a{{color:#0645AD;}}
+    .caption{{font-size:12pt; margin:8px 0 6px}}
+    .imgbox{{margin:6px 0 18px}}
+    img{{max-width:100%; height:auto; display:block; border:1px solid #ddd;}}
+    """
+
+    parts = []
+    parts.append(
+        f"<!doctype html><html><head><meta charset='utf-8'>"
+        f"<meta name='viewport' content='width=device-width,initial-scale=1'>"
+        f"<style>{css}</style></head><body><div class='wrap'>"
+    )
+
+    parts.append(
+        f"<h2>Monthly Statistics Report {escape(curr_month)} {escape(curr_year)}</h2>"
+    )
+    parts.append(
+        f"<h1><a href='{escape(url_hotel)}' target='_blank'>{escape(title_hotel.upper())}</a></h1>"
+    )
+
+    # изображения по тому же порядку, что и в DOCX
+    for file_name in sorted(os.listdir(folder_path)):
+        if not file_name.lower().endswith((".png", ".jpg", ".jpeg")):
+            continue
+
+        caption = mapping_paragraph.get(file_name)
+        if caption is not None:
+            if caption:
+                parts.append(f"<div class='caption'>{_linkify(caption)}</div>")
+
+        img_path = folder_path / file_name
+        try:
+            data_uri = _img_to_data_uri(img_path)
+            parts.append(f"<div class='imgbox'><img src='{data_uri}' alt=''></div>")
+        except Exception as e:
+            parts.append(
+                f"<div class='caption' style='color:#b00'>[Image error: {escape(str(e))}]</div>"
+            )
+
+    parts.append("</div></body></html>")
+    return "".join(parts)
 
 
 # =========================
@@ -219,7 +315,6 @@ def build_reports_dir(curr_year: str, curr_month: str) -> Path:
 
 
 def create_formatted_doc() -> None:
-    reports_dir = build_reports_dir(curr_year, curr_month)
     screenshots_dir = Path(SCREENSHOTS_DIR)
 
     for folder_name in os.listdir(screenshots_dir):
@@ -229,28 +324,25 @@ def create_formatted_doc() -> None:
             continue
 
         json_file = load_links(hotel_id, title_hotel)
-        city_stars = json_file.get("city", "City")
-
+        city = json_file.get("city", "City")
+        reports_dir = build_reports_dir(curr_year, curr_month, city)
+        star = json_file.get("star", "*")
         rating_url = json_file.get("rating_url")
         url_hotel = f"{BASE_URL_TH}hotel/{hotel_id}"
         mapping_paragraph = build_mapping(
-            hotel_id, rating_url=rating_url, city_stars=city_stars
+            hotel_id, rating_url=rating_url, city=city, star=star
         )
 
         doc = Document()
         add_header_image(
             doc, "th_logo/logo_1.jpg", width_inches=1.5, bottom_margin_cm=0.2
         )
-
         ensure_normal_style_arial(doc)
-
-        # Заголовок файла
         title_1 = doc.add_paragraph()
         title_1.alignment = WD_ALIGN_PARAGRAPH.CENTER
         run_1 = title_1.add_run(f"Monthly Statistics Report {curr_month} {curr_year}")
         set_run_arial(run_1, size_pt=FONT_SIZE_TITLE)
 
-        # Название отеля — кликабельное, строго 18 pt
         title_2 = doc.add_paragraph()
         title_2.alignment = WD_ALIGN_PARAGRAPH.CENTER
         add_hyperlink(
@@ -261,21 +353,17 @@ def create_formatted_doc() -> None:
             bold=True,
         )
 
-        # Тело: подписи и картинки
         for file_name in sorted(os.listdir(folder_path)):
             if not file_name.lower().endswith((".png", ".jpg", ".jpeg")):
                 continue
-
             if file_name in PAGE_BREAK_FILES:
                 doc.add_page_break()
-
             caption = mapping_paragraph.get(file_name)
             if caption is not None:
                 p = doc.add_paragraph()
                 p.alignment = WD_ALIGN_PARAGRAPH.LEFT
                 if caption:
                     add_text_with_links(p, caption, font_size_pt=FONT_SIZE_CAPTION)
-
             image_path = folder_path / file_name
             try:
                 doc.add_picture(str(image_path), width=Inches(IMAGE_WIDTH_INCHES))
@@ -284,11 +372,18 @@ def create_formatted_doc() -> None:
                 for r in err_p.runs:
                     set_run_arial(r, size_pt=FONT_SIZE_CAPTION)
 
-        # Сохранение
         safe_name = title_hotel.replace(" ", "_").replace("*", "")
-        save_path = reports_dir / f"{safe_name}.docx"
-        doc.save(save_path)
-        print(f"✔ Report created: {save_path}")
+        docx_path = reports_dir / f"{safe_name}.docx"
+        doc.save(docx_path)
+        print(f"✔ Report created: {docx_path}")
+
+        # === HTML с base64 для вставки в письмо ===
+        html = _build_inline_html(
+            title_hotel, url_hotel, mapping_paragraph, folder_path
+        )
+        html_path = reports_dir / f"{safe_name}_inline.html"
+        html_path.write_text(html, encoding="utf-8")
+        print(f"✔ Inline HTML created: {html_path}")
 
 
 if __name__ == "__main__":
