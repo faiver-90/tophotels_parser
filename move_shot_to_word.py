@@ -12,7 +12,7 @@ from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor, Cm
 from dotenv import load_dotenv
 
-from config_app import SCREENSHOTS_DIR, curr_month, curr_year, BASE_URL_TH, BASE_URL_PRO
+from config_app import SCREENSHOTS_DIR, CURRENT_MONTH, CURRENT_YEAR, BASE_URL_TH, BASE_URL_PRO
 from utils import get_desktop_dir, normalize_windows_path, load_links
 
 import base64
@@ -280,7 +280,7 @@ def _build_inline_html(
     )
 
     parts.append(
-        f"<h2>Monthly Statistics Report {escape(curr_month)} {escape(curr_year)}</h2>"
+        f"<h2>Monthly Statistics Report {escape(CURRENT_MONTH)} {escape(CURRENT_YEAR)}</h2>"
     )
     parts.append(
         f"<h1><a href='{escape(url_hotel)}' target='_blank'>{escape(title_hotel.upper())}</a></h1>"
@@ -325,7 +325,7 @@ def create_formatted_doc() -> None:
 
         json_file = load_links(hotel_id, title_hotel)
         city = json_file.get("city", "City")
-        reports_dir = build_reports_dir(curr_year, curr_month, city)
+        reports_dir = build_reports_dir(CURRENT_YEAR, CURRENT_MONTH, city)
         star = json_file.get("star", "*")
         rating_url = json_file.get("rating_url")
         url_hotel = f"{BASE_URL_TH}hotel/{hotel_id}"
@@ -340,7 +340,7 @@ def create_formatted_doc() -> None:
         ensure_normal_style_arial(doc)
         title_1 = doc.add_paragraph()
         title_1.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        run_1 = title_1.add_run(f"Monthly Statistics Report {curr_month} {curr_year}")
+        run_1 = title_1.add_run(f"Monthly Statistics Report {CURRENT_MONTH} {CURRENT_YEAR}")
         set_run_arial(run_1, size_pt=FONT_SIZE_TITLE)
 
         title_2 = doc.add_paragraph()

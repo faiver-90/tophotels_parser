@@ -5,10 +5,12 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from dotenv import load_dotenv
 
+load_dotenv()
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 
-curr_month = datetime.now().strftime("%B")
-curr_year = datetime.now().strftime("%Y")
+CURRENT_MONTH = os.getenv("CURRENT_MONTH") or datetime.now().strftime("%B")
+CURRENT_YEAR  = os.getenv("CURRENT_YEAR")  or datetime.now().strftime("%Y")
 
 file_handler = RotatingFileHandler(
     SCRIPT_DIR / "script.log",
@@ -27,7 +29,6 @@ logging.basicConfig(
     ],
 )
 
-load_dotenv()
 EMAIL = os.getenv("EMAIL")
 PASSWORD = os.getenv("PASSWORD")
 
