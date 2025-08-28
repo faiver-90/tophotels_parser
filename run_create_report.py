@@ -15,8 +15,8 @@ if __name__ == "__main__":
     asyncio.run(run_create_report())
     create_formatted_doc()
     print(f"{'*' * 100} \nElapsed: {perf_counter() - t1:.1f}s\n {'*' * 100}")
-    if os.path.exists(SCREENSHOTS_DIR):
-        shutil.rmtree(SCREENSHOTS_DIR)
+    # if os.path.exists(SCREENSHOTS_DIR):
+    #     shutil.rmtree(SCREENSHOTS_DIR)
     logging.info("*" * 100)
 
     if SLEEP:
