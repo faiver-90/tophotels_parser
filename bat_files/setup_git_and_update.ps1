@@ -1,6 +1,6 @@
 Param(
     [string]$RepoPath = ".",
-    [switch]$PersistUserPath  # if set, append Git path to *User* PATH (no admin required)
+    [switch]$PersistUserPath  # если указано, добавляет Git в PATH пользователя
 )
 
 function Write-Info($msg) { Write-Host "[INFO] $msg" -ForegroundColor Cyan }
@@ -11,7 +11,6 @@ function Write-Err($msg)  { Write-Host "[ERR ] $msg" -ForegroundColor Red }
 function Find-GitPath {
     $cmd = (Get-Command git.exe -ErrorAction SilentlyContinue)
     if ($cmd) { return Split-Path -Parent $cmd.Path }
-
     $candidates = @(
         "$env:ProgramFiles\Git\cmd",
         "$env:ProgramFiles\Git\bin",
@@ -170,53 +169,32 @@ try {
     $fullPath = (Get-Item -LiteralPath $RepoPath).FullName
     Write-Info "Repo path: $fullPath"
 
-    # Если нет .git — инициализация на месте (НЕ clone)
-    if (-not (Test-IsGitRepo $fullPath)) {
-        Push-Location $fullPath
-        try {
-            Write-Warn "No .git found at $fullPath"
-            Write-Info "Initializing repo in existing folder..."
-            git init | Out-Null
-            git branch -M main 2>$null | Out-Null
-            if ((git remote 2>$null) -split "\r?\n" | Where-Object { $_ -eq "origin" }) {
-                git remote set-url origin https://github.com/faiver-90/tophotels_parser.git | Out-Null
-            } else {
-                git remote add origin https://github.com/faiver-90/tophotels_parser.git | Out-Null
-            }
-            Write-Ok "Repo initialized and origin set to HTTPS."
-        } finally {
-            Pop-Location
-        }
-    }
-
-    if (-not (Test-IsGitRepo $fullPath)) { Write-Err "Not a git repo (no .git)"; throw "Not a git repo" }
-
     Push-Location $fullPath
     try {
-        Write-Info "Force-sync to origin/main (local files will be overwritten)..."
-        git config --global credential.helper manager-core 2>$null | Out-Null
-
-        # fetch c повторами
-        $ok = $false
-        for ($i=1; $i -le 3 -and -not $ok; $i++) {
-            Write-Info "git fetch try $i/3..."
-            git fetch origin main --depth=1
-            if ($LASTEXITCODE -eq 0) { $ok = $true; break }
-            Start-Sleep -Seconds (3 * $i)
+        if (-not (Test-IsGitRepo $fullPath)) {
+            Write-Warn "No .git found at $fullPath"
+            Write-Info "Initializing new git repo..."
+            git init
+            git branch -M main 2>$null | Out-Null
+            git remote add origin https://github.com/faiver-90/tophotels_parser.git
+            git reset --hard HEAD
+            git clean -fd
+            git pull origin main
+            Write-Ok "Repo initialized and linked to HTTPS remote."
+        } else {
+            Write-Ok "Git repo already initialized."
         }
-        if (-not $ok) { Write-Err "git fetch failed"; throw "git fetch failed" }
 
-        git reset --hard origin/main
-        if ($LASTEXITCODE -ne 0) { Write-Err "git reset --hard failed"; throw "git reset failed" }
-
-        git clean -fdx
-        if ($LASTEXITCODE -ne 0) { Write-Err "git clean failed"; throw "git clean failed" }
-
-        git branch -M main
-        git branch --set-upstream-to=origin/main main 2>$null | Out-Null
-
-        Write-Ok "Local tree forcibly synced to origin/main."
-    } finally { Pop-Location }
+        # Обновляем проект из origin/main
+        Write-Info "Pulling latest changes from origin/main..."
+        git pull origin main
+        if ($LASTEXITCODE -ne 0) {
+            Write-Err "git pull failed. Возможно, нужны креды (PAT/логин+пароль)."
+            throw "git pull failed"
+        }
+        Write-Ok "Repo updated from origin/main."
+    }
+    finally { Pop-Location }
 
     Write-Ok "Done."
     exit 0
