@@ -123,7 +123,7 @@ if errorlevel 1 (
   echo [!] Failed to install Playwright via pip.
   goto :PAUSE_AND_EXIT_ERR
 )
-python -m playwright install
+python -m playwright install chromium
 if errorlevel 1 (
   echo [!] Failed to install Playwright browsers.
   goto :PAUSE_AND_EXIT_ERR

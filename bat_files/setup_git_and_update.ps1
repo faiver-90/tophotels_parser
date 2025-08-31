@@ -170,31 +170,73 @@ try {
     Write-Info "Repo path: $fullPath"
 
     Push-Location $fullPath
-    try {
-        if (-not (Test-IsGitRepo $fullPath)) {
-            Write-Warn "No .git found at $fullPath"
-            Write-Info "Initializing new git repo..."
-            git init
-            git branch -M main 2>$null | Out-Null
-            git remote add origin https://github.com/faiver-90/tophotels_parser.git
-            git reset --hard HEAD
-            git clean -fd
+try {
+    if (-not (Test-IsGitRepo $fullPath)) {
+        Write-Warn "No .git found at $fullPath"
+        Write-Info "Initializing new git repo..."
+        git init
+        git branch -M main 2>$null | Out-Null
+        git remote add origin https://github.com/faiver-90/tophotels_parser.git
+        git reset --hard HEAD
+        git clean -fd
+
+        # --- git pull при инициализации с ретраем ---
+        Write-Info "Pulling latest changes from origin/main (init)..."
+        $maxRetries = 3
+        $attempt = 1
+        $success = $false
+
+        while ($attempt -le $maxRetries -and -not $success) {
             git pull origin main
-            Write-Ok "Repo initialized and linked to HTTPS remote."
-        } else {
-            Write-Ok "Git repo already initialized."
+            if ($LASTEXITCODE -eq 0) {
+                Write-Ok "Repo initialized and linked to HTTPS remote."
+                $success = $true
+            } else {
+                Write-Warn "git pull failed (attempt $attempt of $maxRetries)."
+                if ($attempt -lt $maxRetries) {
+                    Start-Sleep -Seconds 5
+                    Write-Info "Retrying..."
+                }
+                $attempt++
+            }
         }
 
-        # Обновляем проект из origin/main
-        Write-Info "Pulling latest changes from origin/main..."
-        git pull origin main
-        if ($LASTEXITCODE -ne 0) {
-            Write-Err "git pull failed. Возможно, нужны креды (PAT/логин+пароль)."
+        if (-not $success) {
+            Write-Err "git pull failed after $maxRetries attempts (init). Возможно, нужны креды (PAT/логин+пароль)."
             throw "git pull failed"
         }
-        Write-Ok "Repo updated from origin/main."
+    } else {
+        Write-Ok "Git repo already initialized."
     }
-    finally { Pop-Location }
+
+    # --- git pull для обновления с ретраем ---
+    Write-Info "Pulling latest changes from origin/main..."
+    $maxRetries = 3
+    $attempt = 1
+    $success = $false
+
+    while ($attempt -le $maxRetries -and -not $success) {
+        git pull origin main
+        if ($LASTEXITCODE -eq 0) {
+            Write-Ok "Repo updated from origin/main."
+            $success = $true
+        } else {
+            Write-Warn "git pull failed (attempt $attempt of $maxRetries)."
+            if ($attempt -lt $maxRetries) {
+                Start-Sleep -Seconds 5
+                Write-Info "Retrying..."
+            }
+            $attempt++
+        }
+    }
+
+    if (-not $success) {
+        Write-Err "git pull failed after $maxRetries attempts. Возможно, нужны креды (PAT/логин+пароль)."
+        throw "git pull failed"
+    }
+}
+finally { Pop-Location }
+
 
     Write-Ok "Done."
     exit 0
