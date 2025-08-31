@@ -59,7 +59,7 @@ if not defined PY_EXE (
 ) else (
   echo [*] Python found: %PY_EXE%
 )
-############################
+
 echo.
 echo =============================
 echo Step 2.5: Git check/update

@@ -15,7 +15,7 @@ OUTPUT_TXT = Path("picked_hotel_ids.txt")
 network_link = [
     "https://tophotels.ru/brand/baron-hotels"
 ]
-
+#test update
 
 async def _auto_scroll_to_bottom(page: Page, max_iters: int = 30):
     last_height = 0
