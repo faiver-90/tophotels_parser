@@ -39,6 +39,7 @@ FLAG_ON_TABLE_FOR_DELETE = "#yii-debug-toolbar > div.yii-debug-toolbarbar > div.
 TG_LOCATOR = "body > div.page.page--blue > i"
 TG_BODY_ADD = "body > div.page.page--blue > section.js-block.thpro-tg-infoblock"
 WE_USE_COOKIES = '#cookie-agreement'
+YII_TOOLS = "//*[@id='yii-debug-toolbar']"
 POLL_OVERLAY_SELECTORS = [
     # точечно под ваш HTML
     ".lsfw-popup-wrap",
@@ -62,5 +63,6 @@ POLL_OVERLAY_SELECTORS = [
     TG_BODY_ADD,
     TG_LOCATOR,
     FLAG_ON_TABLE_FOR_DELETE,
-    WE_USE_COOKIES
+    WE_USE_COOKIES,
+    YII_TOOLS
 ]
