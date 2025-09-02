@@ -119,12 +119,12 @@ def build_mapping(
     rating_url = rating_url or f"{base}/new_stat/rating-hotels"
     return {
         "01_top_element.png": "",
-        "02_populars_element.png": "Popularity of the hotel",
-        "03_reviews.png": "Rating and recommendations of hotel",
-        "04_attendance.png": f"Hotel profile attendance by month: {base}/new_stat/attendance",
-        "06_service_prices.png": f"Log of booking requests: {base}/stat/profile?group=week&vw=grouped",
-        "07_rating_in_hurghada.png": f"Ranking of {city} {star} hotels by ratings over the last 2 years: {rating_url}",
-        "08_activity.png": f"Last page activity: {base}/activity/index",
+        "02_populars_element.png": "Popularity of the hotel\n",
+        "03_reviews.png": "Rating and recommendations of hotel\n",
+        "04_attendance.png": f"Hotel profile attendance by month: {base}/new_stat/attendance\n",
+        "06_service_prices.png": f"Log of booking requests: {base}/stat/profile?group=week&vw=grouped\n",
+        "07_rating_in_hurghada.png": f"Ranking of {city} {star} hotels by ratings over the last 2 years: {rating_url}\n",
+        "08_activity.png": f"Last page activity: {base}/activity/index\n",
     }
 
 

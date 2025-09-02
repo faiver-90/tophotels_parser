@@ -48,6 +48,9 @@ RETRIES_FOR_DELETE_LOCATORS = int(os.getenv("RETRIES_FOR_DELETE_LOCATORS", 3))
 
 HEADLESS = os.getenv("HEADLESS", "True").strip().lower() == "true"
 
+CONCURRENCY = int(os.getenv("CONCURRENCY", "1"))
+AUTH_STATE = Path("auth_state.json")
+
 MAX_ATTEMPTS_RUN = int(os.getenv("MAX_ATTEMPTS_RUN", 5))
 MAX_FIRST_RUN = int(os.getenv("MAX_FIRST_RUN", 2))
 
@@ -57,7 +60,13 @@ RESOLUTION_H = int(os.getenv("RESOLUTION_H", 1000))
 RESOLUTION_W = int(os.getenv("RESOLUTION_W", 1005))
 
 PAGE_BREAK_FILES = {"07_rating_in_hurghada.png", "08_activity.png", "04_attendance.png"}
-
+ENABLED_SHOTS = ["01_top_element.png",
+                 "02_populars_element.png",
+                 "03_reviews.png",
+                 "04_attendance.png",
+                 "06_service_prices.png",
+                 "07_rating_in_hurghada.png",
+                 "08_activity.png"]
 # Word
 FONT_NAME = "Roboto"
 FONT_SIZE_TITLE = 12

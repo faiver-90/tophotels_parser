@@ -131,7 +131,7 @@ async def rating_hotels_in_hurghada(page: Page, count_review: str, hotel_id: str
         await _safe_element_screenshot(
             page,
             selector=ALL_TABLE_RATING_OVEREVIEW_LOCATOR,
-            path=get_screenshot_path(hotel_id, hotel_title, "07_rating_in_hurghada_timeout.png"),
+            path=get_screenshot_path(hotel_id, hotel_title, "07_rating_in_hurghada.png"),
         )
         # Не поднимаем PlaywrightError — чтобы не зациклиться
     except PlaywrightError:

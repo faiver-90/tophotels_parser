@@ -5,10 +5,10 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from wor_modules.create_html_version import _export_docx_to_word_html_and_inline, _build_inline_html
-from wor_modules.create_meta_data import create_meta_data
-from wor_modules.create_wod_file import create_word_file
-from wor_modules.resize_all_images import _resize_all_images
+from word_modules.create_html_version import _build_inline_html
+from word_modules.create_meta_data import create_meta_data
+from word_modules.create_word_file import create_word_file
+from word_modules.resize_all_images import _resize_all_images
 
 try:
     import win32com.client as win32  # type: ignore
@@ -49,19 +49,13 @@ def create_formatted_doc(target_image_width_px: int | None = None) -> None:
             title_hotel, folder_path, url_hotel, mapping_paragraph, reports_dir
         )
         safe_name = title_hotel.replace(" ", "_").replace("*", "")
-        docx_path = reports_dir / f"{safe_name}.docx"
 
-        # 4) HTML: сначала пробуем Word Filtered HTML с интегрированными картинками (сохранение верстки Word)
-        word_inline_html = _export_docx_to_word_html_and_inline(docx_path)
-
-        if word_inline_html is None:
-            # 5) Fallback: ваш старый «чистый» inline-HTML (без вордовских mso-стилей)
-            html = _build_inline_html(
-                title_hotel, url_hotel, mapping_paragraph, folder_path
-            )
-            html_path = reports_dir / f"{safe_name}_inline.html"
-            html_path.write_text(html, encoding="utf-8")
-            print(f"✔ Inline HTML (fallback) created: {html_path}")
+        html = _build_inline_html(
+            title_hotel, url_hotel, mapping_paragraph, folder_path
+        )
+        html_path = reports_dir / f"{safe_name}_inline.html"
+        html_path.write_text(html, encoding="utf-8")
+        print(f"✔ Inline HTML (fallback) created: {html_path}")
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ from typing import Optional, Iterable
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page
 from tqdm import tqdm
 
-from config_app import HOTELS_IDS_FILE, HEADLESS, RESOLUTION_W, RESOLUTION_H
+from config_app import HOTELS_IDS_FILE, HEADLESS, RESOLUTION_W, RESOLUTION_H, ENABLED_SHOTS, CONCURRENCY, AUTH_STATE
 from auth_service import AuthService
 
 from parce_screenshots_moduls.utils import (
@@ -19,7 +19,6 @@ from parce_screenshots_moduls.utils import (
 from parce_screenshots_moduls.moduls.top_screen import top_screen
 from parce_screenshots_moduls.moduls.review_screen import review_screen
 from parce_screenshots_moduls.moduls.attendance import attendance
-# from parce_screenshots_moduls.moduls.dynamic_rating import dynamic_rating
 from parce_screenshots_moduls.moduls.service_prices import service_prices
 from parce_screenshots_moduls.moduls.rating_hotels_in_hurghada import (
     rating_hotels_in_hurghada,
@@ -28,8 +27,7 @@ from parce_screenshots_moduls.moduls.last_activity import last_activity
 
 from utils import safe_step  # твоя обёртка
 
-CONCURRENCY = int(os.getenv("CONCURRENCY", "1"))
-AUTH_STATE = Path("auth_state.json")
+
 
 
 async def login_once_and_save_state(browser: Browser) -> None:
@@ -67,7 +65,6 @@ async def process_hotel(page: Page, hotel_id: str) -> None:
     await safe_step(top_screen, page, hotel_id, title)
     count_review = await safe_step(review_screen, page, hotel_id, title)
     await safe_step(attendance, page, hotel_id, title)
-    # await safe_step(dynamic_rating, page, hotel_id, title)
     await safe_step(service_prices, page, hotel_id, title)
     await safe_step(rating_hotels_in_hurghada, page, count_review, hotel_id, title)
     await safe_step(last_activity, page, hotel_id, title)
@@ -76,7 +73,7 @@ async def process_hotel(page: Page, hotel_id: str) -> None:
 
 
 async def worker(
-    name: str, browser: Browser, queue: asyncio.Queue[str], pbar: tqdm
+        name: str, browser: Browser, queue: asyncio.Queue[str], pbar: tqdm
 ) -> None:
     """Воркер: свой контекст и одна страница, берёт ID из очереди."""
     ctx = await make_context(browser)
@@ -95,13 +92,6 @@ async def worker(
     except asyncio.CancelledError:
         pass
     finally:
-        # Удаляем, так как ТХ ПРО не видит регистрацию без проходки в регистрации
-        try:
-            os.remove(AUTH_STATE)
-        except FileNotFoundError:
-            pass
-        except OSError as e:
-            logging.warning("Не удалось удалить auth_state.json: %s", e)
         await page.close()
         await ctx.close()
 
@@ -118,18 +108,11 @@ def _dedupe(seq: Iterable[str]) -> list[str]:
 
 def _hotel_folder_matches(hotel_id: str, folder_name: str) -> bool:
     # Папки у тебя вида "al233_Jaz Fayrouz" — сверяем префикс до подчёркивания
-    print(hotel_id)
     return folder_name.startswith(f"{hotel_id}_")
 
 
-ENABLED_SHOTS = ["01_top_element.png",
-                 "02_populars_element.png",
-                 "03_reviews.png",
-                 "04_attendance.png",
-                 "06_service_prices.png",
-                 "07_rating_in_hurghada.png",
-                 "08_activity.png"]
-REQUIRED_EXT = {".png",".jpg",".jpeg"}
+REQUIRED_EXT = {".png", ".jpg", ".jpeg"}
+
 
 def hotels_needing_retry(screens_dir: Path, hotel_ids: list[str]) -> list[str]:
     need = []
@@ -137,7 +120,8 @@ def hotels_needing_retry(screens_dir: Path, hotel_ids: list[str]) -> list[str]:
     for hid in hotel_ids:
         fold = next((f for f in existing if _hotel_folder_matches(hid, f)), None)
         if not fold:
-            need.append(hid); continue
+            need.append(hid)
+            continue
         files = {p.name for p in (screens_dir / fold).iterdir()
                  if p.suffix.lower() in REQUIRED_EXT}
         # проверяем именно нужные имена

@@ -6,7 +6,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 from docx.shared import Inches, Pt
 
-from wor_modules.docs_helpers import (
+from word_modules.docs_helpers import (
     add_header_image,
     ensure_normal_style_arial,
     set_run_arial,

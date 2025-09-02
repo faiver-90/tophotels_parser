@@ -1,6 +1,6 @@
 from config_app import BASE_URL_TH, CURRENT_YEAR, CURRENT_MONTH
 from utils import load_links
-from wor_modules.docs_helpers import build_reports_dir, build_mapping
+from word_modules.docs_helpers import build_reports_dir, build_mapping
 
 
 def create_meta_data(hotel_id, title_hotel):
