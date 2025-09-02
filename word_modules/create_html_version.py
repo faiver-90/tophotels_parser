@@ -95,10 +95,11 @@ def _build_inline_html(
     )
 
     parts.append(f"""
+    <br>
     <table border="0" cellspacing="0" cellpadding="0" width="600" style="border-collapse:collapse;">
       <tr>
-        <td width="190" valign="top" style="padding:0 80px 0 0;margin:0;">
-          {img_html}
+        <td width="190" valign="top" style="padding:0 70px 0 30px;margin:0;">
+              {img_html}
         </td>
         <td valign="top" style="padding:0;margin:0;font-family:'Segoe UI', Arial, sans-serif;font-size:10.5pt;line-height:14pt;color:#000;">
           <div style="margin:0;padding:0;font-family:'Segoe UI', Arial, sans-serif;font-size:10.5pt;line-height:14pt;color:#000;">
