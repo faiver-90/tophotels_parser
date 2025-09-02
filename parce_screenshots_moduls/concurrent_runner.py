@@ -12,9 +12,8 @@ from config_app import HOTELS_IDS_FILE, HEADLESS, RESOLUTION_W, RESOLUTION_H, EN
 from auth_service import AuthService
 
 from parce_screenshots_moduls.utils import (
-    load_hotel_ids,
     set_language_en,
-    get_title_hotel,
+    get_title_star_hotel,
 )
 from parce_screenshots_moduls.moduls.top_screen import top_screen
 from parce_screenshots_moduls.moduls.review_screen import review_screen
@@ -25,7 +24,7 @@ from parce_screenshots_moduls.moduls.rating_hotels_in_hurghada import (
 )
 from parce_screenshots_moduls.moduls.last_activity import last_activity
 
-from utils import safe_step  # твоя обёртка
+from utils import safe_step, save_to_jsonfile, load_hotel_ids  # твоя обёртка
 
 
 
@@ -56,11 +55,12 @@ async def make_context(browser: Browser) -> BrowserContext:
 
 async def process_hotel(page: Page, hotel_id: str) -> None:
     """Полный пайплайн по одному отелю на своей странице."""
-    title: Optional[str] = await safe_step(get_title_hotel, page, hotel_id)
-
+    title, star = await safe_step(get_title_star_hotel, page, hotel_id)
+    save_to_jsonfile(hotel_id, title, key="star", value=star)
     if title is None:
         logging.warning("⚠ Не удалось получить title для %s, пробуем ещё раз...", hotel_id)
-        title = await safe_step(get_title_hotel, page, hotel_id)
+        title = await safe_step(get_title_star_hotel, page, hotel_id)
+
 
     await safe_step(top_screen, page, hotel_id, title)
     count_review = await safe_step(review_screen, page, hotel_id, title)

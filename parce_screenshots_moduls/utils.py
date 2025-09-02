@@ -2,7 +2,6 @@ import asyncio
 import logging
 from pathlib import Path
 
-from typing import List
 from typing import Optional, Pattern
 from playwright.async_api import Response
 
@@ -15,19 +14,11 @@ from config_app import BASE_URL_PRO, BASE_URL_TH
 from parce_screenshots_moduls.delete_any_popup import nuke_poll_overlay
 
 from parce_screenshots_moduls.moduls.locators import (
-    TG_HIDE_LOCATOR,
     FLAG_LOCATOR,
     TITLE_HOTEL_LOCATOR, EN_LANG_BUTTON_LOCATOR,
 )
+from utils import normalize_text
 
-
-def load_hotel_ids(file_path: str) -> List[str]:
-    with open(file_path, "r", encoding="utf-8") as f:
-        return [
-            line.strip()
-            for line in f
-            if line.strip().lower().startswith("al") and line.strip()[2:].isdigit()
-        ]
 
 
 @retry(
@@ -35,7 +26,7 @@ def load_hotel_ids(file_path: str) -> List[str]:
     wait=wait_fixed(2),
     retry=retry_if_exception_type(PlaywrightError),
 )
-async def get_title_hotel(page: Page, hotel_id):
+async def get_title_star_hotel(page: Page, hotel_id):
     try:
         url = BASE_URL_TH + "hotel/" + hotel_id
         await goto_strict(page, url, nuke_overlays=nuke_poll_overlay, expect_url=url, timeout=70000)
@@ -48,8 +39,11 @@ async def get_title_hotel(page: Page, hotel_id):
         element = await page.query_selector(TITLE_HOTEL_LOCATOR)
         if element is None:
             raise PlaywrightError("title_hotel не найден")
-        title = await element.text_content()
-        return title.strip()[:-2].strip()
+        title_row = await element.text_content()
+
+        title = normalize_text(title_row)[:-3]
+        star = normalize_text(title_row)[-2:]
+        return title, star
     except Exception:
         logging.exception("[get_title_hotel] Ошибка при выполнении")
 

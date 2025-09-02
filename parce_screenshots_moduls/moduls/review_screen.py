@@ -10,7 +10,7 @@ from config_app import BASE_URL_TH, DELAY_FOR_DELETE, RETRIES_FOR_DELETE_LOCATOR
 from parce_screenshots_moduls.delete_any_popup import nuke_poll_overlay
 from parce_screenshots_moduls.moduls.locators import (
     REVIEW_LOCATOR,
-    COUNT_REVIEW_LOCATOR,
+    COUNT_REVIEW_LOCATOR
 )
 from parce_screenshots_moduls.utils import goto_strict
 from utils import get_screenshot_path

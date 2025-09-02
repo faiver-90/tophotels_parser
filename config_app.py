@@ -6,6 +6,8 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from dotenv import load_dotenv
 
+from utils import load_hotel_ids
+
 load_dotenv()
 
 SCRIPT_DIR = Path(__file__).resolve().parent

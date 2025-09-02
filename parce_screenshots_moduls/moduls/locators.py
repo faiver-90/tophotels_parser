@@ -33,7 +33,7 @@ REVIEW_50_LOCATOR = (
 FALLBACK_CONTAINER_SERVICE_PRICES = (
     "body > div.page.page--blue > main"  # широкий контейнер на .pro
 )
-CITY_NAME_AND_STAR_LOCATOR = '//*[@id="tab-pjax-index"]/div/div[2]/div[6]/table/tbody/tr[1]/td[2]/a'
+CITY_LOCATOR = '#container > nav.breadcrumbs > a:nth-child(4)'
 
 FLAG_ON_TABLE_FOR_DELETE = "#yii-debug-toolbar > div.yii-debug-toolbarbar > div.yii-debug-toolbarblock.yii-debug-toolbar__title > a > img"
 TG_LOCATOR = "body > div.page.page--blue > i"

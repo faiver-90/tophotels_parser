@@ -6,7 +6,7 @@ from config_app import BASE_URL_PRO, RETRIES_FOR_DELETE_LOCATORS, DELAY_FOR_DELE
 from parce_screenshots_moduls.delete_any_popup import nuke_poll_overlay
 from parce_screenshots_moduls.moduls.locators import (
     SERVICES_AND_PRICES_LOCATOR,
-    FALLBACK_CONTAINER_SERVICE_PRICES,
+    FALLBACK_CONTAINER_SERVICE_PRICES
 )
 from parce_screenshots_moduls.utils import goto_strict, safe_full_page_screenshot
 from utils import get_screenshot_path
@@ -45,7 +45,6 @@ async def service_prices(page: Page, hotel_id, hotel_title=None):
         loc = page.locator(SERVICES_AND_PRICES_LOCATOR).first
 
         await loc.wait_for(state="visible", timeout=1000)
-
         old_vp = page.viewport_size or {"width": 1005, "height": 1000}
         try:
             await page.set_viewport_size(

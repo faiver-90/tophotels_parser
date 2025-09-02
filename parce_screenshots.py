@@ -6,9 +6,9 @@ from config_app import (
     SCREENSHOTS_DIR,
     MAX_ATTEMPTS_RUN,
     MAX_FIRST_RUN,
+    ENABLED_SHOTS,
 )
-
-from parce_screenshots_moduls.utils import load_hotel_ids
+from utils import load_hotel_ids
 
 
 async def run_create_report():
@@ -35,7 +35,7 @@ async def run_create_report():
                 SCREENSHOTS_DIR, hotel_ids_all
             )
             if not left:
-                print("✅ All folders contain at least 8 images.")
+                print(f"✅ All folders contain at least len({ENABLED_SHOTS})images.")
                 break
         else:
             print("⚠ Ещё один круг…")

@@ -8,7 +8,6 @@ from parce_screenshots_moduls.delete_any_popup import nuke_poll_overlay
 from parce_screenshots_moduls.moduls.locators import (
     ALL_TABLE_RATING_OVEREVIEW_LOCATOR,
     RATING_HOTEL_IN_HURGHADA_LOCATOR,
-    CITY_NAME_AND_STAR_LOCATOR,
     REVIEW_10_LOCATOR,
     REVIEW_50_LOCATOR, NO_DATA_SELECTOR,
 )
@@ -93,20 +92,6 @@ async def rating_hotels_in_hurghada(page: Page, count_review: str, hotel_id: str
         # Если терминальная ветка — выходим сразу
         if await error_handlers(page, page_content, hotel_id, hotel_title):
             return
-
-        # --- обычный сценарий ---
-        # Город и звезды: селектор есть только на «полной» странице
-        await page.wait_for_selector(CITY_NAME_AND_STAR_LOCATOR, state="visible", timeout=1000)
-        element_city = await page.query_selector(CITY_NAME_AND_STAR_LOCATOR)
-        city_raw = (await element_city.text_content()) or ""
-        # Разбор без падений на коротких строках
-        parts = [p.strip() for p in city_raw.split("/") if p.strip()]
-        last_part = parts[-1] if parts else city_raw
-        words = last_part.split()
-        city = normalize_text(" ".join(words[-2:]) if len(words) >= 2 else last_part)[:-2].strip()
-        star = normalize_text(" ".join(words[-2:]) if len(words) >= 2 else last_part)[-2:].strip()
-        save_to_jsonfile(hotel_id, hotel_title, key="city", value=city)
-        save_to_jsonfile(hotel_id, hotel_title, key="star", value=star)
 
         # Переключатель по количеству отзывов
         reviews_num = int(count_review.replace(" ", "") or "0")

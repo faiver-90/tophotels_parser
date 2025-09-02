@@ -7,11 +7,10 @@ import shutil
 from pathlib import Path
 import platform
 import re
-
+from typing import List
 
 from tenacity import RetryError
 
-from config_app import SCREENSHOTS_DIR, AUTH_STATE
 
 
 # ----------------------- Desktop resolver -----------------------
@@ -78,6 +77,8 @@ def normalize_windows_path(path_str: str) -> Path:
 
 def get_hotel_folder(hotel_id: str | int, hotel_title: str) -> Path:
     """Возвращает Path к папке отеля и гарантирует её наличие."""
+    from config_app import SCREENSHOTS_DIR
+
     folder = Path(SCREENSHOTS_DIR) / f"{hotel_id}_{hotel_title}"
     folder.mkdir(parents=True, exist_ok=True)
     return folder
@@ -179,11 +180,23 @@ def capitalize_sentences(text: str) -> str:
 
 
 def delete_screenshots():
+    from config_app import SCREENSHOTS_DIR
+
     if os.path.exists(SCREENSHOTS_DIR):
         shutil.rmtree(SCREENSHOTS_DIR)
 
 
 
 def delete_auth_state():
+    from config_app import AUTH_STATE
+
     if os.path.exists(AUTH_STATE):
         os.remove(AUTH_STATE)
+
+def load_hotel_ids(file_path: str) -> List[str]:
+    with open(file_path, "r", encoding="utf-8") as f:
+        return [
+            line.strip()
+            for line in f
+            if line.strip().lower().startswith("al") and line.strip()[2:].isdigit()
+        ]
