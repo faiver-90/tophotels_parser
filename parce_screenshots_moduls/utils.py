@@ -2,6 +2,8 @@ import asyncio
 import logging
 from pathlib import Path
 
+
+from typing import Callable, Awaitable
 from typing import Optional, Pattern
 from playwright.async_api import Response
 
@@ -204,3 +206,25 @@ async def goto_strict(
                 continue
             # закончили попытки — пробрасываем
             raise
+
+
+async def with_viewport(
+    page: Page,
+    width: int,
+    height: int,
+    action: Callable[[], Awaitable[None]],
+) -> None:
+    """
+    Временно меняет размер окна браузера, выполняет действие и возвращает старый размер.
+
+    :param page: Playwright Page
+    :param width: новая ширина вьюпорта
+    :param height: новая высота вьюпорта
+    :param action: корутина, которая выполняется при изменённом размере
+    """
+    old_vp = page.viewport_size or {"width": 1280, "height": 800}
+    await page.set_viewport_size({"width": width, "height": height})
+    try:
+        await action()
+    finally:
+        await page.set_viewport_size(old_vp)

@@ -12,7 +12,7 @@ from parce_screenshots_moduls.moduls.locators import (
     POPULARS_LOCATOR,
     CITY_LOCATOR, CHAIN_HOTEL_LOCATOR,
 )
-from parce_screenshots_moduls.utils import goto_strict
+from parce_screenshots_moduls.utils import goto_strict, with_viewport
 from utils import get_screenshot_path, normalize_text, save_to_jsonfile
 
 
@@ -23,12 +23,14 @@ async def save_city(page, hotel_id, hotel_title):
     city = normalize_text(city_raw).split("Hotels ")[-1]
     save_to_jsonfile(hotel_id, hotel_title, key="city", value=city)
 
+
 async def save_chain(page, hotel_id, hotel_title):
     await page.wait_for_selector(CHAIN_HOTEL_LOCATOR, state="visible", timeout=1000)
     element_chain = await page.query_selector(CHAIN_HOTEL_LOCATOR)
     chain_raw = (await element_chain.text_content()) or ""
     chain = normalize_text(chain_raw)
     save_to_jsonfile(hotel_id, hotel_title, key="chain", value=chain)
+
 
 @retry(
     stop=stop_after_attempt(3),
@@ -57,12 +59,15 @@ async def top_screen(page: Page, hotel_id, hotel_title=None):
         )
 
         element2 = await page.query_selector(POPULARS_LOCATOR)
-        old_viewport = page.viewport_size
-        await page.set_viewport_size({"width": 1550, "height": 1000})
-        await element2.screenshot(
-            path=get_screenshot_path(hotel_id, hotel_title, "02_populars_element.png")
+
+        await with_viewport(
+            page,
+            width=1550,
+            height=1000,
+            action=lambda: element2.screenshot(
+                path=get_screenshot_path(hotel_id, hotel_title, "02_populars_element.png")
+            )
         )
-        await page.set_viewport_size(old_viewport)
 
     except Exception:
         logging.exception(f"[top_screen] Ошибка при выполнении {url}")
