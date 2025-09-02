@@ -21,8 +21,8 @@ if __name__ == "__main__":
         if SLEEP:
             sleep_system()
     finally:
-        if os.path.exists(SCREENSHOTS_DIR):
-            shutil.rmtree(SCREENSHOTS_DIR)
+        # if os.path.exists(SCREENSHOTS_DIR):
+        #     shutil.rmtree(SCREENSHOTS_DIR)
         # Удаляем, так как ТХ ПРО не видит регистрацию без проходки в регистрации
         try:
             os.remove(AUTH_STATE)

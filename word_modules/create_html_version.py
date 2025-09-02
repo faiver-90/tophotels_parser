@@ -81,7 +81,7 @@ def _build_inline_html(
 
     # --- подпись: таблица с логотипом и текстом ---
     try:
-        logo_path = Path("th_logo") / "logo_2.jpg"
+        logo_path = Path("th_logo") / "logo_1.jpg"
         logo_data_uri = _img_to_data_uri(logo_path) if logo_path.exists() else ""
     except Exception:
         logo_data_uri = ""
@@ -95,33 +95,39 @@ def _build_inline_html(
     )
 
     parts.append(f"""
-    <style>
-      .signature {{
-        font-family: Segoe UI, Arial, sans-serif;
-        font-size: 10.5pt;
-        color: #000;
-        line-height: 14pt;
-      }}
-      .signature em {{ font-style: Roboto; }}
-      .signature .name {{ color:#0f4761; }}
-      .signature a {{ color:#0070c0; text-decoration:none; font-weight:bold; }}
-    </style>
-
-    <table class="signature" border="0" cellspacing="0" cellpadding="0" width="600">
+    <table border="0" cellspacing="0" cellpadding="0" width="600" style="border-collapse:collapse;">
       <tr>
-        <td width="190" valign="top">
+        <td width="190" valign="top" style="padding:0 80px 0 0;margin:0;">
           {img_html}
         </td>
-        <td valign="top">
-          <div><em>Best regards,</em></div>
-          <div class="name">ISTAT</div>
-          <div>ACCOUNT MANAGER</div>
-          <div>Project TopHotels.ru</div>
-          <div>E-mail: <a href="mailto:istat@mediatravel.me">istat@mediatravel.me</a></div>
+        <td valign="top" style="padding:0;margin:0;font-family:'Segoe UI', Arial, sans-serif;font-size:10.5pt;line-height:14pt;color:#000;">
+          <div style="margin:0;padding:0;font-family:'Segoe UI', Arial, sans-serif;font-size:10.5pt;line-height:14pt;color:#000;">
+            <em>Best regards,</em>
+          </div>
+          <div style="height:6pt;line-height:6pt;font-size:0;">&nbsp;</div>
+          <div style="margin:0;padding:0;font-family:'Segoe UI', Arial, sans-serif;font-size:10.5pt;line-height:14pt;font-weight:bold;color:#0f4761;">
+            ISTAT
+          </div>
+          <div style="height:4pt;line-height:4pt;font-size:0;">&nbsp;</div>
+          <div style="margin:0;padding:0;font-family:'Segoe UI', Arial, sans-serif;font-size:10.5pt;line-height:14pt;color:#000;">
+            ACCOUNT MANAGER
+          </div>
+          <div style="height:4pt;line-height:4pt;font-size:0;">&nbsp;</div>
+          <div style="margin:0;padding:0;font-family:'Segoe UI', Arial, sans-serif;font-size:10.5pt;line-height:14pt;color:#000;">
+            Project TopHotels.ru
+          </div>
+          <div style="height:8pt;line-height:8pt;font-size:0;">&nbsp;</div>
+          <div style="margin:0;padding:0;font-family:'Segoe UI', Arial, sans-serif;font-size:10.5pt;line-height:14pt;color:#000;">
+            E-mail:
+            <a href="mailto:istat@mediatravel.me" style="color:#0070c0;text-decoration:none;font-weight:bold;font-family:'Segoe UI', Arial, sans-serif;font-size:10.5pt;line-height:14pt;">
+              istat@mediatravel.me
+            </a>
+          </div>
         </td>
       </tr>
     </table>
     """)
+
     # --- конец подписи ---
 
     parts.append("</div></body></html>")
