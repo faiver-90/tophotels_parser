@@ -105,7 +105,8 @@ def save_to_jsonfile(
     """Сохраняет ссылку в links.json в папке отеля.
     Если ключ уже есть:
       - если значение одно, оно превращается в список
-      - если список, в него добавляется новый элемент
+      - если список, добавляется новый элемент
+      - дубликаты не добавляются
     """
     folder = get_hotel_folder(hotel_id, hotel_title)
     meta = folder / "links.json"
@@ -117,18 +118,21 @@ def save_to_jsonfile(
         except Exception:
             data = {}
 
-    # добавляем значение по ключу
     if key not in data:
         data[key] = value
     else:
-        # если уже список, добавляем
         if isinstance(data[key], list):
-            data[key].append(value)
+            # добавляем только если ещё нет такого значения
+            if value not in data[key]:
+                data[key].append(value)
         else:
-            # если было одно значение — превращаем в список
-            data[key] = [data[key], value]
+            # если одно значение и оно не совпадает — превращаем в список
+            if data[key] != value:
+                data[key] = [data[key], value]
+            # если совпадает — ничего не делаем
 
     meta.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
 
 
 async def safe_step(step_fn, *args, **kwargs):
