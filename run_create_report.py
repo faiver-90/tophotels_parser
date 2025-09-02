@@ -1,9 +1,8 @@
 import asyncio
 import logging
-import os
 from time import perf_counter
 
-from config_app import SLEEP, SCREENSHOTS_DIR
+from config_app import SLEEP
 from move_shot_to_word import create_formatted_doc
 from parce_screenshots import run_create_report
 

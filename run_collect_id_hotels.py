@@ -4,17 +4,16 @@ from pathlib import Path
 from playwright.async_api import async_playwright, Page
 from config_app import HEADLESS
 
-savoy = ['al1799', 'al5054', 'al13549', 'al23213']
-xperience = ['al12495', 'al66167', 'al70320', 'al247995']
-parotel = ['al1802', 'al14258', 'al323704']
-amphoras = ['al4115', 'al27559', 'al27677']
+savoy = ["al1799", "al5054", "al13549", "al23213"]
+xperience = ["al12495", "al66167", "al70320", "al247995"]
+parotel = ["al1802", "al14258", "al323704"]
+amphoras = ["al4115", "al27559", "al27677"]
 hotels_ids = [savoy, xperience, parotel, amphoras]
 
 OUTPUT_TXT = Path("picked_hotel_ids.txt")
 
-network_link = [
-    "https://tophotels.ru/brand/baron-hotels"
-]
+network_link = ["https://tophotels.ru/brand/baron-hotels"]
+
 
 async def _auto_scroll_to_bottom(page: Page, max_iters: int = 30):
     last_height = 0
@@ -98,5 +97,5 @@ async def run_collect_id_from_link():
         await browser.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(run_collect_id_from_link())

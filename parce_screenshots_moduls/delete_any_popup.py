@@ -9,7 +9,9 @@ KEEP_SELECTORS = [
 ]
 
 
-async def _click_if_present(page: Page, root: Optional[any], sel: str, timeout: int = 800) -> bool:
+async def _click_if_present(
+    page: Page, root: Optional[any], sel: str, timeout: int = 800
+) -> bool:
     """Пытаемся кликнуть по селектору внутри root (или на странице), игнорируем ошибки."""
     try:
         scope = root if root else page
@@ -83,11 +85,17 @@ async def _remove_element(el_handle) -> bool:
         return True
     except Exception:
         return False
+
+
 # Быстрый предикат: селектор явно «попапный» -> можно не гонять дорогую _is_overlay_candidate
-_POPUP_HINT_RE = re.compile(r"popup|modal|overlay|backdrop|aria-modal|role=['\"]dialog['\"]", re.I)
+_POPUP_HINT_RE = re.compile(
+    r"popup|modal|overlay|backdrop|aria-modal|role=['\"]dialog['\"]", re.I
+)
+
 
 def _looks_like_overlay_selector(sel: str) -> bool:
     return bool(_POPUP_HINT_RE.search(sel))
+
 
 async def _any_overlays_present(page: Page) -> bool:
     """Один быстрый вызов в JS: есть ли хоть один элемент из списка селекторов."""
@@ -108,11 +116,12 @@ async def _any_overlays_present(page: Page) -> bool:
     except Exception:
         return True  # на всякий случай не прерываем очистку
 
+
 async def nuke_poll_overlay(
     page: Page,
     *,
-    retries: int = 2,          # меньше по умолчанию
-    delay_ms: int = 120,       # короче пауза
+    retries: int = 2,  # меньше по умолчанию
+    delay_ms: int = 120,  # короче пауза
     per_selector_limit: int = 5,  # не обрабатываем сотни совпадений на широкий селектор
 ) -> None:
     """
@@ -128,8 +137,10 @@ async def nuke_poll_overlay(
          - после любой успешной операции — быстро проверить, остались ли оверлеи; если нет — выйти.
     Между попытками — короткая пауза, но только если действительно что-то поменяли.
     """
+
     async def _mark_keep():
-        await page.evaluate("""
+        await page.evaluate(
+            """
           (list) => {
             for (const sel of list) {
               try {
@@ -137,7 +148,9 @@ async def nuke_poll_overlay(
               } catch (e) {}
             }
           }
-        """, KEEP_SELECTORS)
+        """,
+            KEEP_SELECTORS,
+        )
 
     # Early exit перед первой попыткой
     if not await _any_overlays_present(page):

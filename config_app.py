@@ -13,7 +13,7 @@ load_dotenv()
 SCRIPT_DIR = Path(__file__).resolve().parent
 
 CURRENT_MONTH = os.getenv("CURRENT_MONTH") or datetime.now().strftime("%B")
-CURRENT_YEAR  = os.getenv("CURRENT_YEAR")  or datetime.now().strftime("%Y")
+CURRENT_YEAR = os.getenv("CURRENT_YEAR") or datetime.now().strftime("%Y")
 
 file_handler = RotatingFileHandler(
     SCRIPT_DIR / "script.log",
@@ -62,13 +62,15 @@ RESOLUTION_H = int(os.getenv("RESOLUTION_H", 1000))
 RESOLUTION_W = int(os.getenv("RESOLUTION_W", 1005))
 
 PAGE_BREAK_FILES = {"07_rating_in_hurghada.png", "08_activity.png", "04_attendance.png"}
-ENABLED_SHOTS = ["01_top_element.png",
-                 "02_populars_element.png",
-                 "03_reviews.png",
-                 "04_attendance.png",
-                 "06_service_prices.png",
-                 "07_rating_in_hurghada.png",
-                 "08_activity.png"]
+ENABLED_SHOTS = [
+    "01_top_element.png",
+    "02_populars_element.png",
+    "03_reviews.png",
+    "04_attendance.png",
+    "06_service_prices.png",
+    "07_rating_in_hurghada.png",
+    "08_activity.png",
+]
 # Word
 FONT_NAME = "Roboto"
 FONT_SIZE_TITLE = 12

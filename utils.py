@@ -12,7 +12,6 @@ from typing import List
 from tenacity import RetryError
 
 
-
 # ----------------------- Desktop resolver -----------------------
 def get_desktop_dir() -> Path:
     """
@@ -135,7 +134,6 @@ def save_to_jsonfile(
     meta.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-
 async def safe_step(step_fn, *args, **kwargs):
     try:
         return await step_fn(*args, **kwargs)
@@ -186,12 +184,12 @@ def delete_screenshots():
         shutil.rmtree(SCREENSHOTS_DIR)
 
 
-
 def delete_auth_state():
     from config_app import AUTH_STATE
 
     if os.path.exists(AUTH_STATE):
         os.remove(AUTH_STATE)
+
 
 def load_hotel_ids(file_path: str) -> List[str]:
     with open(file_path, "r", encoding="utf-8") as f:

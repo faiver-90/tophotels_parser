@@ -1,6 +1,9 @@
 import asyncio
 
-from parce_screenshots_moduls.concurrent_runner import hotels_needing_retry, run_concurrent
+from parce_screenshots_moduls.concurrent_runner import (
+    hotels_needing_retry,
+    run_concurrent,
+)
 from config_app import (
     HOTELS_IDS_FILE,
     SCREENSHOTS_DIR,
@@ -31,9 +34,7 @@ async def run_create_report():
 
         if attempt >= MAX_FIRST_RUN:
             # После нужного количества кругов — проверяем ещё раз
-            left = hotels_needing_retry(
-                SCREENSHOTS_DIR, hotel_ids_all
-            )
+            left = hotels_needing_retry(SCREENSHOTS_DIR, hotel_ids_all)
             if not left:
                 print(f"✅ All folders contain at least len({ENABLED_SHOTS})images.")
                 break

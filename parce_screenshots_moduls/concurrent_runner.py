@@ -8,7 +8,15 @@ from typing import Optional, Iterable
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page
 from tqdm import tqdm
 
-from config_app import HOTELS_IDS_FILE, HEADLESS, RESOLUTION_W, RESOLUTION_H, ENABLED_SHOTS, CONCURRENCY, AUTH_STATE
+from config_app import (
+    HOTELS_IDS_FILE,
+    HEADLESS,
+    RESOLUTION_W,
+    RESOLUTION_H,
+    ENABLED_SHOTS,
+    CONCURRENCY,
+    AUTH_STATE,
+)
 from auth_service import AuthService
 
 from parce_screenshots_moduls.utils import (
@@ -25,8 +33,6 @@ from parce_screenshots_moduls.moduls.rating_hotels_in_hurghada import (
 from parce_screenshots_moduls.moduls.last_activity import last_activity
 
 from utils import safe_step, save_to_jsonfile, load_hotel_ids  # твоя обёртка
-
-
 
 
 async def login_once_and_save_state(browser: Browser) -> None:
@@ -58,9 +64,10 @@ async def process_hotel(page: Page, hotel_id: str) -> None:
     title, star = await safe_step(get_title_star_hotel, page, hotel_id)
     save_to_jsonfile(hotel_id, title, key="star", value=star)
     if title is None:
-        logging.warning("⚠ Не удалось получить title для %s, пробуем ещё раз...", hotel_id)
+        logging.warning(
+            "⚠ Не удалось получить title для %s, пробуем ещё раз...", hotel_id
+        )
         title = await safe_step(get_title_star_hotel, page, hotel_id)
-
 
     await safe_step(top_screen, page, hotel_id, title)
     count_review = await safe_step(review_screen, page, hotel_id, title)
@@ -73,7 +80,7 @@ async def process_hotel(page: Page, hotel_id: str) -> None:
 
 
 async def worker(
-        name: str, browser: Browser, queue: asyncio.Queue[str], pbar: tqdm
+    name: str, browser: Browser, queue: asyncio.Queue[str], pbar: tqdm
 ) -> None:
     """Воркер: свой контекст и одна страница, берёт ID из очереди."""
     ctx = await make_context(browser)
@@ -122,8 +129,11 @@ def hotels_needing_retry(screens_dir: Path, hotel_ids: list[str]) -> list[str]:
         if not fold:
             need.append(hid)
             continue
-        files = {p.name for p in (screens_dir / fold).iterdir()
-                 if p.suffix.lower() in REQUIRED_EXT}
+        files = {
+            p.name
+            for p in (screens_dir / fold).iterdir()
+            if p.suffix.lower() in REQUIRED_EXT
+        }
         # проверяем именно нужные имена
         missing = [name for name in ENABLED_SHOTS if name not in files]
         if missing:

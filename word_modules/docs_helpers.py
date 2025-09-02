@@ -13,6 +13,7 @@ from docx.shared import Inches, Pt, RGBColor, Cm
 from config_app import BASE_URL_PRO, FONT_SIZE_CAPTION, FONT_NAME, URL_RE
 from utils import normalize_windows_path, get_desktop_dir
 
+
 def add_header_image(
     doc: Document,
     image_path: str | Path,

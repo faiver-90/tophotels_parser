@@ -60,9 +60,7 @@ async def last_activity(page: Page, hotel_id, hotel_title=None):
         if row_count > 24 * 2:
             with Image.open(full_path) as img:
                 width, height = img.size
-                top_half = img.crop(
-                    (0, 0, width, height)
-                )  # Оставляем верхнюю половину
+                top_half = img.crop((0, 0, width, height))  # Оставляем верхнюю половину
                 top_half.save(full_path)
 
         await page.set_viewport_size(old_viewport)

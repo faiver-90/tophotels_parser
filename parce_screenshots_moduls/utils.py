@@ -15,10 +15,10 @@ from parce_screenshots_moduls.delete_any_popup import nuke_poll_overlay
 
 from parce_screenshots_moduls.moduls.locators import (
     FLAG_LOCATOR,
-    TITLE_HOTEL_LOCATOR, EN_LANG_BUTTON_LOCATOR,
+    TITLE_HOTEL_LOCATOR,
+    EN_LANG_BUTTON_LOCATOR,
 )
 from utils import normalize_text
-
 
 
 @retry(
@@ -29,7 +29,9 @@ from utils import normalize_text
 async def get_title_star_hotel(page: Page, hotel_id):
     try:
         url = BASE_URL_TH + "hotel/" + hotel_id
-        await goto_strict(page, url, nuke_overlays=nuke_poll_overlay, expect_url=url, timeout=70000)
+        await goto_strict(
+            page, url, nuke_overlays=nuke_poll_overlay, expect_url=url, timeout=70000
+        )
 
         await page.wait_for_selector(
             TITLE_HOTEL_LOCATOR,

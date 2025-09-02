@@ -9,7 +9,8 @@ from parce_screenshots_moduls.moduls.locators import (
     ALL_TABLE_RATING_OVEREVIEW_LOCATOR,
     RATING_HOTEL_IN_HURGHADA_LOCATOR,
     REVIEW_10_LOCATOR,
-    REVIEW_50_LOCATOR, NO_DATA_SELECTOR,
+    REVIEW_50_LOCATOR,
+    NO_DATA_SELECTOR,
 )
 from parce_screenshots_moduls.utils import goto_strict
 from utils import get_screenshot_path, save_to_jsonfile, normalize_text
@@ -31,19 +32,25 @@ async def _safe_element_screenshot(page: Page, selector: str, path: str) -> None
             logging.exception("Не удалось сделать скриншот ни элемента, ни страницы")
 
 
-async def error_handlers(page: Page, page_content: str, hotel_id: str, hotel_title: str) -> bool:
+async def error_handlers(
+    page: Page, page_content: str, hotel_id: str, hotel_title: str
+) -> bool:
     """
     Возвращает True, если ситуация терминальная и дальше идти не нужно.
     Делает скрины и логирует.
     """
     # 1) Нет данных по отелю
     if "There is no data for the hotel" in page_content:
-        logging.warning(f"[{hotel_id}] Нет данных по отелю ({hotel_title}) — 'There is no data for the hotel'")
+        logging.warning(
+            f"[{hotel_id}] Нет данных по отелю ({hotel_title}) — 'There is no data for the hotel'"
+        )
         # Скриним блок, который точно есть, или всю страницу
         await _safe_element_screenshot(
             page,
             selector=NO_DATA_SELECTOR,
-            path=get_screenshot_path(hotel_id, hotel_title, "07_rating_in_hurghada.png"),
+            path=get_screenshot_path(
+                hotel_id, hotel_title, "07_rating_in_hurghada.png"
+            ),
         )
         # Можно сохранить маркёр в JSON для последующей логики
         save_to_jsonfile(hotel_id, hotel_title, key="rating_status", value="no_data")
@@ -55,9 +62,13 @@ async def error_handlers(page: Page, page_content: str, hotel_id: str, hotel_tit
         await _safe_element_screenshot(
             page,
             selector=ALL_TABLE_RATING_OVEREVIEW_LOCATOR,  # если нет — упадём на фулл-скрин
-            path=get_screenshot_path(hotel_id, hotel_title, "07_rating_in_hurghada.png"),
+            path=get_screenshot_path(
+                hotel_id, hotel_title, "07_rating_in_hurghada.png"
+            ),
         )
-        save_to_jsonfile(hotel_id, hotel_title, key="rating_status", value="account_inactive")
+        save_to_jsonfile(
+            hotel_id, hotel_title, key="rating_status", value="account_inactive"
+        )
         return True
 
     return False
@@ -68,7 +79,9 @@ async def error_handlers(page: Page, page_content: str, hotel_id: str, hotel_tit
     wait=wait_fixed(1),
     retry=retry_if_exception_type((PlaywrightError, TimeoutError)),
 )
-async def rating_hotels_in_hurghada(page: Page, count_review: str, hotel_id: str, hotel_title: str | None = None):
+async def rating_hotels_in_hurghada(
+    page: Page, count_review: str, hotel_id: str, hotel_title: str | None = None
+):
     url = BASE_URL_PRO + f"hotel/{hotel_id}/new_stat/rating-hotels"
 
     try:
@@ -95,9 +108,13 @@ async def rating_hotels_in_hurghada(page: Page, count_review: str, hotel_id: str
 
         # Переключатель по количеству отзывов
         reviews_num = int(count_review.replace(" ", "") or "0")
-        await page.click(REVIEW_10_LOCATOR if 10 < reviews_num < 50 else REVIEW_50_LOCATOR)
+        await page.click(
+            REVIEW_10_LOCATOR if 10 < reviews_num < 50 else REVIEW_50_LOCATOR
+        )
 
-        await page.wait_for_selector(RATING_HOTEL_IN_HURGHADA_LOCATOR, state="visible", timeout=3000)
+        await page.wait_for_selector(
+            RATING_HOTEL_IN_HURGHADA_LOCATOR, state="visible", timeout=3000
+        )
         element = await page.query_selector(RATING_HOTEL_IN_HURGHADA_LOCATOR)
 
         current_url = page.url
@@ -105,7 +122,9 @@ async def rating_hotels_in_hurghada(page: Page, count_review: str, hotel_id: str
 
         if element:
             await element.screenshot(
-                path=get_screenshot_path(hotel_id, hotel_title, "07_rating_in_hurghada.png")
+                path=get_screenshot_path(
+                    hotel_id, hotel_title, "07_rating_in_hurghada.png"
+                )
             )
         else:
             logging.warning(f"[{hotel_id}] Таблица рейтинга не найдена на {url}")
@@ -116,7 +135,9 @@ async def rating_hotels_in_hurghada(page: Page, count_review: str, hotel_id: str
         await _safe_element_screenshot(
             page,
             selector=ALL_TABLE_RATING_OVEREVIEW_LOCATOR,
-            path=get_screenshot_path(hotel_id, hotel_title, "07_rating_in_hurghada.png"),
+            path=get_screenshot_path(
+                hotel_id, hotel_title, "07_rating_in_hurghada.png"
+            ),
         )
         # Не поднимаем PlaywrightError — чтобы не зациклиться
     except PlaywrightError:
@@ -125,7 +146,9 @@ async def rating_hotels_in_hurghada(page: Page, count_review: str, hotel_id: str
         await _safe_element_screenshot(
             page,
             selector=ALL_TABLE_RATING_OVEREVIEW_LOCATOR,
-            path=get_screenshot_path(hotel_id, hotel_title, "07_rating_in_hurghada_error.png"),
+            path=get_screenshot_path(
+                hotel_id, hotel_title, "07_rating_in_hurghada_error.png"
+            ),
         )
         # Исключение перехвачено — наружу не кидаем, чтобы прекратить ретраи
     except Exception:
@@ -134,5 +157,7 @@ async def rating_hotels_in_hurghada(page: Page, count_review: str, hotel_id: str
         await _safe_element_screenshot(
             page,
             selector=ALL_TABLE_RATING_OVEREVIEW_LOCATOR,
-            path=get_screenshot_path(hotel_id, hotel_title, "07_rating_in_hurghada_unexpected.png"),
+            path=get_screenshot_path(
+                hotel_id, hotel_title, "07_rating_in_hurghada_unexpected.png"
+            ),
         )

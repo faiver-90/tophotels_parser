@@ -33,7 +33,9 @@ async def attendance(page: Page, hotel_id, hotel_title=None):
 
     try:
         for attempt in range(attempts):
-            await goto_strict(page, url, nuke_overlays=nuke_poll_overlay, expect_url=url)
+            await goto_strict(
+                page, url, nuke_overlays=nuke_poll_overlay, expect_url=url
+            )
             # Ждём основной контент
             await page.wait_for_selector(
                 ATTENDANCE_LOCATOR, state="visible", timeout=30000
