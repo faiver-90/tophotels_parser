@@ -3,6 +3,7 @@ import os
 import ctypes
 
 import json
+import shutil
 from pathlib import Path
 import platform
 import re
@@ -10,7 +11,7 @@ import re
 
 from tenacity import RetryError
 
-from config_app import SCREENSHOTS_DIR
+from config_app import SCREENSHOTS_DIR, AUTH_STATE
 
 
 # ----------------------- Desktop resolver -----------------------
@@ -171,3 +172,14 @@ def capitalize_sentences(text: str) -> str:
         return match.group(1) + match.group(2).upper()
 
     return re.sub(r"(^|[.!?]\s+)([a-zа-яё])", repl, text)
+
+
+def delete_screenshots():
+    if os.path.exists(SCREENSHOTS_DIR):
+        shutil.rmtree(SCREENSHOTS_DIR)
+
+
+
+def delete_auth_state():
+    if os.path.exists(AUTH_STATE):
+        os.remove(AUTH_STATE)
