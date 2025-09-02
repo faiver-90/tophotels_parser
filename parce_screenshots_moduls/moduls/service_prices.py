@@ -44,7 +44,7 @@ async def service_prices(page: Page, hotel_id, hotel_title=None):
 
         loc = page.locator(SERVICES_AND_PRICES_LOCATOR).first
 
-        await loc.wait_for(state="visible", timeout=1000)
+        await loc.wait_for(state="visible", timeout=3000)
         old_vp = page.viewport_size or {"width": 1005, "height": 1000}
         try:
             await page.set_viewport_size(
