@@ -7,6 +7,9 @@ auth_state.json
 *reports*/
 ids.txt
 picked_hotel_ids.txt
+service_account_google_drive.json
+credentials.json
+token.json
 # Python: кэш и временные файлы
 __pycache__/
 **/__pycache__/
