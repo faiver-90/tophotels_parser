@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
@@ -54,3 +55,14 @@ SLEEP = os.getenv("SLEEP", "False").strip().lower() == "true"
 
 RESOLUTION_H = int(os.getenv("RESOLUTION_H", 1000))
 RESOLUTION_W = int(os.getenv("RESOLUTION_W", 1005))
+
+PAGE_BREAK_FILES = {"07_rating_in_hurghada.png", "08_activity.png", "04_attendance.png"}
+
+# Word
+FONT_NAME = "Roboto"
+FONT_SIZE_TITLE = 12
+FONT_SIZE_HOTEL_LINK = 12
+FONT_SIZE_CAPTION = 13
+
+IMAGE_WIDTH_INCHES = 6  # ширина вставки в DOCX (это не пиксели файла; файл мы теперь можем заранее привести)
+URL_RE = re.compile(r"(https?://[^\s)]+)")
