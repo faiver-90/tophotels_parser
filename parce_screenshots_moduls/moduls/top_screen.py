@@ -10,7 +10,7 @@ from parce_screenshots_moduls.delete_any_popup import nuke_poll_overlay
 from parce_screenshots_moduls.moduls.locators import (
     TOP_ELEMENT_LOCATOR,
     POPULARS_LOCATOR,
-    CITY_LOCATOR,
+    CITY_LOCATOR, CHAIN_HOTEL_LOCATOR,
 )
 from parce_screenshots_moduls.utils import goto_strict
 from utils import get_screenshot_path, normalize_text, save_to_jsonfile
@@ -23,6 +23,12 @@ async def save_city(page, hotel_id, hotel_title):
     city = normalize_text(city_raw).split("Hotels ")[-1]
     save_to_jsonfile(hotel_id, hotel_title, key="city", value=city)
 
+async def save_chain(page, hotel_id, hotel_title):
+    await page.wait_for_selector(CHAIN_HOTEL_LOCATOR, state="visible", timeout=1000)
+    element_chain = await page.query_selector(CHAIN_HOTEL_LOCATOR)
+    chain_raw = (await element_chain.text_content()) or ""
+    chain = normalize_text(chain_raw)
+    save_to_jsonfile(hotel_id, hotel_title, key="chain", value=chain)
 
 @retry(
     stop=stop_after_attempt(3),
@@ -41,6 +47,7 @@ async def top_screen(page: Page, hotel_id, hotel_title=None):
         await page.wait_for_selector(POPULARS_LOCATOR, state="visible", timeout=30000)
 
         await save_city(page, hotel_id, hotel_title)
+        await save_chain(page, hotel_id, hotel_title)
         element = await page.query_selector(TOP_ELEMENT_LOCATOR)
         if element is None:
             raise PlaywrightError("TOP_ELEMENT_LOCATOR не найден")

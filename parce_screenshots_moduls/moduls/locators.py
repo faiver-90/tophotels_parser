@@ -34,7 +34,7 @@ FALLBACK_CONTAINER_SERVICE_PRICES = (
     "body > div.page.page--blue > main"  # широкий контейнер на .pro
 )
 CITY_LOCATOR = "#container > nav.breadcrumbs > a:nth-child(4)"
-
+CHAIN_HOTEL_LOCATOR = '//*[@id="markAltSearchRun"]/tr[7]/td[2]/a[1]'
 FLAG_ON_TABLE_FOR_DELETE = "#yii-debug-toolbar > div.yii-debug-toolbarbar > div.yii-debug-toolbarblock.yii-debug-toolbar__title > a > img"
 TG_LOCATOR = "body > div.page.page--blue > i"
 TG_BODY_ADD = "body > div.page.page--blue > section.js-block.thpro-tg-infoblock"

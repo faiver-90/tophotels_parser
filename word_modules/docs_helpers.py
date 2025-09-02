@@ -129,7 +129,7 @@ def build_mapping(
     }
 
 
-def build_reports_dir(curr_year: str, curr_month: str, city: str) -> Path:
+def build_reports_dir(curr_year: str, curr_month: str, city: str, chain:str) -> Path:
     raw_path = os.getenv("PATH_FOR_REPORTS")
     base_dir = normalize_windows_path(raw_path) if raw_path else get_desktop_dir()
     reports = (
@@ -138,6 +138,7 @@ def build_reports_dir(curr_year: str, curr_month: str, city: str) -> Path:
         / f"{curr_year}"
         / f"{curr_month}"
         / f"{city}"
+        / f"{chain}"
     )
     reports.mkdir(parents=True, exist_ok=True)
     return reports

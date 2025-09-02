@@ -6,7 +6,8 @@ from word_modules.docs_helpers import build_reports_dir, build_mapping
 def create_meta_data(hotel_id, title_hotel):
     json_file = load_links(hotel_id, title_hotel)
     city = json_file.get("city", "City")
-    reports_dir = build_reports_dir(CURRENT_YEAR, CURRENT_MONTH, city)
+    chain = json_file.get("chain", "Chain")
+    reports_dir = build_reports_dir(CURRENT_YEAR, CURRENT_MONTH, city, chain)
     star = json_file.get("star", "*")
     rating_url = json_file.get("rating_url")
     url_hotel = f"{BASE_URL_TH}hotel/{hotel_id}"
