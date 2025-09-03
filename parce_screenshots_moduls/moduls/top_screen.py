@@ -3,7 +3,7 @@ import logging
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
 from playwright.async_api import Error as PlaywrightError
 
-from playwright.async_api import Page
+from playwright.async_api import Page, TimeoutError as PlaywrightTimeoutError
 
 from config_app import BASE_URL_TH
 from parce_screenshots_moduls.delete_any_popup import nuke_poll_overlay
@@ -25,11 +25,20 @@ async def save_city(page, hotel_id, hotel_title):
 
 
 async def save_chain(page, hotel_id, hotel_title):
-    await page.wait_for_selector(CHAIN_HOTEL_LOCATOR, state="visible", timeout=1000)
-    element_chain = await page.query_selector(CHAIN_HOTEL_LOCATOR)
-    chain_raw = (await element_chain.text_content()) or ""
-    chain = normalize_text(chain_raw)
-    save_to_jsonfile(hotel_id, hotel_title, key="chain", value=chain)
+    loc = page.locator(CHAIN_HOTEL_LOCATOR)
+    try:
+        # Ждём чуть дольше, но только если элемент действительно есть
+        if await loc.count() > 0:
+            await loc.first.wait_for(state="visible", timeout=3000)
+            chain_raw = await loc.first.text_content()
+            chain = normalize_text(chain_raw or "")
+            save_to_jsonfile(hotel_id, hotel_title, key="chain", value=chain)
+        else:
+            # Нет такого блока на странице — сохраняем None/"" и идём дальше
+            save_to_jsonfile(hotel_id, hotel_title, key="chain", value=None)
+    except PlaywrightTimeoutError:
+        # Был, но не стал «visible» вовремя — не валим пайплайн
+        save_to_jsonfile(hotel_id, hotel_title, key="chain", value=None)
 
 
 @retry(
@@ -47,7 +56,6 @@ async def top_screen(page: Page, hotel_id, hotel_title=None):
             TOP_ELEMENT_LOCATOR, state="visible", timeout=30000
         )
         await page.wait_for_selector(POPULARS_LOCATOR, state="visible", timeout=30000)
-
         await save_city(page, hotel_id, hotel_title)
         await save_chain(page, hotel_id, hotel_title)
         element = await page.query_selector(TOP_ELEMENT_LOCATOR)
