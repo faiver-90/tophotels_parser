@@ -35,10 +35,10 @@ async def save_chain(page, hotel_id, hotel_title):
             save_to_jsonfile(hotel_id, hotel_title, key="chain", value=chain)
         else:
             # Нет такого блока на странице — сохраняем None/"" и идём дальше
-            save_to_jsonfile(hotel_id, hotel_title, key="chain", value=None)
+            save_to_jsonfile(hotel_id, hotel_title, key="chain", value="None_chain")
     except PlaywrightTimeoutError:
         # Был, но не стал «visible» вовремя — не валим пайплайн
-        save_to_jsonfile(hotel_id, hotel_title, key="chain", value=None)
+        save_to_jsonfile(hotel_id, hotel_title, key="chain", value="None_chain")
 
 
 @retry(
