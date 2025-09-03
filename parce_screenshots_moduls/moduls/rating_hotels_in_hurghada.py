@@ -1,6 +1,9 @@
 import logging
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
-from playwright.async_api import Error as PlaywrightError, TimeoutError
+from playwright.async_api import (
+    Error as PlaywrightError,
+    TimeoutError as PlaywrightTimeoutError,
+)
 from playwright.async_api import Page
 
 from config_app import BASE_URL_PRO, RETRIES_FOR_DELETE_LOCATORS, DELAY_FOR_DELETE
@@ -11,9 +14,10 @@ from parce_screenshots_moduls.moduls.locators import (
     REVIEW_10_LOCATOR,
     REVIEW_50_LOCATOR,
     NO_DATA_SELECTOR,
+    OUT_OF_RATING_SELECTOR,
 )
 from parce_screenshots_moduls.utils import goto_strict
-from utils import get_screenshot_path, save_to_jsonfile, normalize_text
+from utils import get_screenshot_path, save_to_jsonfile
 
 
 async def _safe_element_screenshot(page: Page, selector: str, path: str) -> None:
@@ -105,15 +109,14 @@ async def rating_hotels_in_hurghada(
         # Если терминальная ветка — выходим сразу
         if await error_handlers(page, page_content, hotel_id, hotel_title):
             return
-
         # Переключатель по количеству отзывов
         reviews_num = int(count_review.replace(" ", "") or "0")
-        await page.click(
-            REVIEW_10_LOCATOR if 10 < reviews_num < 50 else REVIEW_50_LOCATOR
-        )
+        await page.wait_for_selector(REVIEW_10_LOCATOR, state="visible", timeout=4000)
+        await page.wait_for_selector(REVIEW_50_LOCATOR, state="visible", timeout=4000)
+        await page.click(REVIEW_10_LOCATOR if reviews_num < 50 else REVIEW_50_LOCATOR)
 
         await page.wait_for_selector(
-            RATING_HOTEL_IN_HURGHADA_LOCATOR, state="visible", timeout=3000
+            RATING_HOTEL_IN_HURGHADA_LOCATOR, state="visible", timeout=4000
         )
         element = await page.query_selector(RATING_HOTEL_IN_HURGHADA_LOCATOR)
 

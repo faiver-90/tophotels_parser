@@ -29,7 +29,7 @@ async def save_chain(page, hotel_id, hotel_title):
     try:
         # Ждём чуть дольше, но только если элемент действительно есть
         if await loc.count() > 0:
-            await loc.first.wait_for(state="visible", timeout=3000)
+            await loc.first.wait_for(state="visible", timeout=1000)
             chain_raw = await loc.first.text_content()
             chain = normalize_text(chain_raw or "")
             save_to_jsonfile(hotel_id, hotel_title, key="chain", value=chain)

@@ -8,6 +8,7 @@ ATTENDANCE_LOCATOR = "#pg-container-stat > div:nth-child(1)"
 ACTIVITY_TABLE_LOCATOR = "#tab-pjax-index > div.js-bth__tbl.js-act-long-view"
 ROW_ACTIVITY_TABLE_LOCATOR = "#events-list-table > tr"
 RATING_HOTEL_IN_HURGHADA_LOCATOR = "//*[@id='tab-pjax-index']/div[4]"
+OUT_OF_RATING_SELECTOR= '#tab-pjax-index > h2'
 NAME_RATING_TABLE_LOCATOR = '//*[@id="rty"]'
 NO_DATA_SELECTOR = "body > div.page > div:nth-child(6) > div.w100p.content-booking"
 
@@ -17,8 +18,7 @@ ALL_TABLE_RATING_OVEREVIEW_LOCATOR = "#tab-pjax-index > div > div.js-act-long-vi
 FLAG_LOCATOR = "div > div > button > i"
 EN_LANG_BUTTON_LOCATOR = '#pp-lang li[data-key="en"]'
 COUNT_REVIEW_LOCATOR = (
-    "#container > div.card-hotel-wrap.mt30 > section:nth-child(3) > div > section > "
-    "div.card-hotel-rating-list > ul:nth-child(4) > li:nth-child(1) > b"
+    "#container > div.card-hotel-wrap.mt30 > section:nth-child(3) > div > section > div.card-hotel-rating-list > ul:nth-child(4) > li:nth-child(1) > b"
 )
 INCORRECT_DATA_SELECTOR = (
     "#cstm-filter-frm > article > div.js-filter-info.filter-new__info-wrap"
