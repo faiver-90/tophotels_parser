@@ -29,7 +29,7 @@ async def attendance(page: Page, hotel_id, hotel_title=None):
         + hotel_id
         + "/new_stat/attendance?filter%5Bperiod%5D=30"
     )
-    attempts = 5
+    attempts = 10
 
     try:
         for attempt in range(attempts):

@@ -16,7 +16,6 @@ chcp 65001 >nul
 
 REM 0) Go to script directory
 cd /d "%~dp0"
-
 echo =============================
 echo Step 1: Execution Policy
 echo =============================
