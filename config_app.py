@@ -79,3 +79,6 @@ FONT_SIZE_CAPTION = 13
 
 IMAGE_WIDTH_INCHES = 6  # ширина вставки в DOCX (это не пиксели файла; файл мы теперь можем заранее привести)
 URL_RE = re.compile(r"(https?://[^\s)]+)")
+
+WIDTH_TABLES = int(os.getenv("WIDTH_TABLES") or 900)
+DELETE_SCREENSHOTS =  os.getenv("DELETE_SCREENSHOTS", "False").strip().lower() == "true"
