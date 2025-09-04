@@ -15,7 +15,7 @@ if __name__ == "__main__":
         delete_auth_state()
 
         asyncio.run(run_create_report())
-        create_formatted_doc(target_image_width_px=800)
+        create_formatted_doc(target_image_width_px=900)
         print(f"{'*' * 100} \nElapsed: {perf_counter() - t1:.1f}s\n {'*' * 100}")
         logging.info("*" * 100)
         if SLEEP:
