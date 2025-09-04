@@ -81,4 +81,4 @@ IMAGE_WIDTH_INCHES = 6  # ширина вставки в DOCX (это не пи�
 URL_RE = re.compile(r"(https?://[^\s)]+)")
 
 WIDTH_TABLES = int(os.getenv("WIDTH_TABLES") or 900)
-DELETE_SCREENSHOTS =  os.getenv("DELETE_SCREENSHOTS", "False").strip().lower() == "true"
+DELETE_SCREENSHOTS =  os.getenv("DELETE_SCREENSHOTS", "True").strip().lower() == "true"
